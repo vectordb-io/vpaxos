@@ -94,6 +94,7 @@ Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply
 
     Ballot2Pb(receive_ballot, *reply.mutable_trace_ballot());
     reply.set_address(Config::GetInstance().MyAddress()->ToString());
+    reply.set_async_flag(request.async_flag());
 
     DebugLog(true, __FUNCTION__, request.address(), &reply);
 }
@@ -140,6 +141,7 @@ Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &r
 
     Ballot2Pb(receive_ballot, *reply.mutable_trace_ballot());
     reply.set_address(Config::GetInstance().MyAddress()->ToString());
+    reply.set_async_flag(request.async_flag());
 
     DebugLog(true, __FUNCTION__, request.address(), &reply);
 }
@@ -191,11 +193,13 @@ Acceptor::DebugLog(bool is_send, std::string header, std::string address, const 
     std::string str;
     char buf[256];
 
+    snprintf(buf, sizeof(buf), " <tid:%ld>", gettid());
+
     str.append("\n");
     if (is_send) {
-        str.append("|--------------send message---------------|");
+        str.append("|--------------send message---------------|").append(buf);
     } else {
-        str.append("|==============receive message============|");
+        str.append("|==============receive message============|").append(buf);
     }
     str.append("\n");
 

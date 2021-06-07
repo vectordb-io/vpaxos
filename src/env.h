@@ -30,6 +30,8 @@ class Env {
     Status AsyncAccept(const vpaxos_rpc::Accept &request, const std::string &address, AcceptFinishCallBack cb);
     Status AsyncLearn(const vpaxos_rpc::Learn &request, const std::string &address, LearnFinishCallBack cb);
 
+    Status AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call);
+
     // storage
     // for proposer
     Status MaxBallot(Ballot &ballot) const;

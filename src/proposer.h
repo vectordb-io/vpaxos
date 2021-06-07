@@ -74,11 +74,12 @@ class Proposer {
     Proposer& operator=(const Proposer&) = delete;
 
     Status Init();
-    Status Propose(std::string value);
-    Status PrepareAll();
-    Status AcceptAll();
+    Status Propose(std::string value, void *flag);
+    Status PrepareAll(void *flag);
+    Status AcceptAll(void *flag);
 
-    void OnPropose(const vpaxos_rpc::Propose &request, vpaxos_rpc::ProposeReply &reply);
+    void OnPropose(const vpaxos_rpc::Propose &request, void *async_flag);
+
     Status Prepare(const vpaxos_rpc::Prepare &request, const std::string &address);
     Status OnPrepareReply(const vpaxos_rpc::PrepareReply &reply);
     Status Accept(const vpaxos_rpc::Accept &request, const std::string &address);
@@ -93,6 +94,7 @@ class Proposer {
 
     Ballot current_ballot_;
     std::string propose_value_;
+    bool proposing_;
     PrepareManager prepare_manager_;
     AcceptManager accept_manager_;
 };

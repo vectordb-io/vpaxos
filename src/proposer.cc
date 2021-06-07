@@ -214,7 +214,8 @@ AcceptManager::ToString() const {
 }
 
 Proposer::Proposer()
-    :prepare_manager_(Config::GetInstance().Quorum()),
+    :proposing_(false),
+     prepare_manager_(Config::GetInstance().Quorum()),
      accept_manager_(Config::GetInstance().Quorum()) {
 }
 
@@ -276,20 +277,20 @@ Proposer::NextBallot(Ballot b) {
 }
 
 Status
-Proposer::Propose(std::string value) {
+Proposer::Propose(std::string value, void *flag) {
     NextBallot();
     prepare_manager_.Reset(current_ballot_);
     accept_manager_.Reset(current_ballot_);
     propose_value_ = value;
 
-    auto s = PrepareAll();
+    auto s = PrepareAll(flag);
     assert(s.ok());
 
     return Status::OK();
 }
 
 Status
-Proposer::PrepareAll() {
+Proposer::PrepareAll(void *flag) {
     Status s;
     vpaxos_rpc::Prepare request;
 
@@ -298,6 +299,7 @@ Proposer::PrepareAll() {
     Ballot2Pb(current_ballot_, *request.mutable_ballot());
     Ballot2Pb(current_ballot_, *request.mutable_trace_ballot());
     request.set_address(Config::GetInstance().MyAddress()->ToString());
+    request.set_async_flag(reinterpret_cast<uint64_t>(flag));
 
     for (auto &hp : Config::GetInstance().address_) {
         s = Prepare(request, hp->ToString());
@@ -308,12 +310,13 @@ Proposer::PrepareAll() {
 }
 
 Status
-Proposer::AcceptAll() {
+Proposer::AcceptAll(void *flag) {
     Status s;
     vpaxos_rpc::Accept request;
     Ballot2Pb(current_ballot_, *request.mutable_ballot());
     Ballot2Pb(current_ballot_, *request.mutable_trace_ballot());
     request.set_address(Config::GetInstance().MyAddress()->ToString());
+    request.set_async_flag(reinterpret_cast<uint64_t>(flag));
 
     if (prepare_manager_.HasAcceptedValue()) {
         request.set_value(prepare_manager_.AcceptedValue());
@@ -330,28 +333,25 @@ Proposer::AcceptAll() {
 }
 
 void
-Proposer::OnPropose(const vpaxos_rpc::Propose &request, vpaxos_rpc::ProposeReply &reply) {
+Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
     DebugLog(false, __FUNCTION__, "x.x.x.x", &request);
 
-    /*
-    if (Node::GetInstance().learner()->Chosen()) {
-        reply.set_msg("chosen");
-        reply.set_chosen(true);
-        std::string chosen_value;
-        auto s = Node::GetInstance().learner()->ChosenValue(chosen_value);
-        assert(s.ok());
-        reply.set_chosen_value(chosen_value);
-    } else {
-    */
+    if (proposing_) {
 
+        LOG(INFO) << "debug: proposing call:" << async_flag;
 
-    auto s = Propose(request.value());
+        vpaxos_rpc::ProposeReply reply;
+        reply.set_err_code(2);
+        std::string err_msg = "proposing value: ";
+        err_msg.append(propose_value_);
+        reply.set_err_msg(err_msg);
+        Env::GetInstance().AsyncProposeReply(reply, async_flag);
+    }
+
+    proposing_ = true;
+    auto s = Propose(request.value(), async_flag);
     assert(s.ok());
-    reply.set_msg("ok");
-    reply.set_chosen(false);
-    //}
 }
-
 
 Status
 Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address) {
@@ -383,7 +383,7 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
         prepare_manager_.Vote(reply);
         if (prepare_manager_.Majority()) {
             if (!prepare_manager_.accept()) {
-                s = AcceptAll();
+                s = AcceptAll(reinterpret_cast<void*>(reply.async_flag()));
                 assert(s.ok());
                 prepare_manager_.set_accept();
             } else {
@@ -406,7 +406,7 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
         LOG(INFO) << "after rejected, next_ballot: [" << current_ballot_.ToString() << "]";
         prepare_manager_.Reset(current_ballot_);
         accept_manager_.Reset(current_ballot_);
-        auto s = PrepareAll();
+        auto s = PrepareAll(reinterpret_cast<void*>(reply.async_flag()));
         assert(s.ok());
     }
 
@@ -449,12 +449,31 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
             .append("accept_manager_:").append(accept_manager_.ToString()).append("\n");
             LOG(INFO) << log_str;
 
+            // reply to client
+            vpaxos_rpc::ProposeReply propose_reply;
+            std::string err_msg;
+            if (propose_value_ == accept_manager_.AcceptedValue()) {
+                propose_reply.set_err_code(0);
+                err_msg = "value chosen: ";
+            } else {
+                propose_reply.set_err_code(1);
+                err_msg = "another value chosen: ";
+            }
+            err_msg.append(accept_manager_.AcceptedValue());
+            propose_reply.set_err_msg(err_msg);
+            propose_reply.set_chosen_value(accept_manager_.AcceptedValue());
+            uint64_t flag = reply.async_flag();
+            Env::GetInstance().AsyncProposeReply(propose_reply, reinterpret_cast<void*>(flag));
+
+            // learn
             if (!accept_manager_.learn()) {
                 Node::GetInstance().learner()->LearnAll(accept_manager_.AcceptedValue());
                 accept_manager_.set_learn();
             } else {
                 LOG(INFO) << "already broadcast learn for " << current_ballot_.ToString();
             }
+
+            proposing_ = false;
         }
     } else {
         LOG(INFO) << "accept is rejected, prepare again. "
@@ -464,7 +483,7 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
         LOG(INFO) << "after rejected, next_ballot: [" << current_ballot_.ToString() << "]";
         prepare_manager_.Reset(current_ballot_);
         accept_manager_.Reset(current_ballot_);
-        auto s = PrepareAll();
+        auto s = PrepareAll(reinterpret_cast<void*>(reply.async_flag()));
         assert(s.ok());
     }
 
@@ -491,11 +510,13 @@ Proposer::DebugLog(bool is_send, std::string header, std::string address, const 
     std::string str;
     char buf[256];
 
+    snprintf(buf, sizeof(buf), " <tid:%ld>", gettid());
+
     str.append("\n");
     if (is_send) {
-        str.append("|--------------send message---------------|");
+        str.append("|--------------send message---------------|").append(buf);
     } else {
-        str.append("|==============receive message============|");
+        str.append("|==============receive message============|").append(buf);
     }
     str.append("\n");
 

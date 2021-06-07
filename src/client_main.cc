@@ -24,7 +24,9 @@ void Propose(std::string address, std::string value) {
     grpc::ClientContext context;
     grpc::Status s = stub->RpcPropose(&context, request, &reply);
 
-    LOG(INFO) << "receive: " << reply.DebugString();
+    char buf[256];
+    snprintf(buf, sizeof(buf), "err_code:%d | err_msg:%s | chosen_value:%s", reply.err_code(), reply.err_msg().c_str(), reply.chosen_value().c_str());
+    LOG(INFO) << "receive: " << std::string(buf);
 }
 
 int main(int argc, char **argv) {
@@ -46,11 +48,10 @@ int main(int argc, char **argv) {
     LOG(INFO) << "receive from " << reply.address() << ": " << reply.msg();
     */
 
-    std::thread t3(std::bind(Propose, "127.0.0.1:38002", "2222"));
-    t3.join();
+    //std::thread t3(std::bind(Propose, "127.0.0.1:38002", "2222"));
+    //t3.join();
 
 
-    /*
     std::thread t1(std::bind(Propose, "127.0.0.1:38000", "0000"));
     std::thread t2(std::bind(Propose, "127.0.0.1:38001", "1111"));
     std::thread t3(std::bind(Propose, "127.0.0.1:38002", "2222"));
@@ -62,8 +63,6 @@ int main(int argc, char **argv) {
     t3.join();
     t4.join();
     t5.join();
-    */
-
 
     return 0;
 }

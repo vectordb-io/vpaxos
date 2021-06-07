@@ -11,6 +11,7 @@
 #include "config.h"
 #include "async_task_called.h"
 #include "async_task_call.h"
+#include "async_req_manager.h"
 
 namespace vpaxos {
 
@@ -21,11 +22,14 @@ class GrpcServer {
     GrpcServer& operator=(const GrpcServer&) = delete;
     ~GrpcServer();
 
+    Status Init();
     Status Start();
     Status Stop();
     Status StartService();
     void ThreadAsyncCalled();
     void ThreadAsyncCall();
+
+    Status AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call);
 
     void IntendOnPing();
     void OnPing(AsyncTaskOnPing *p);
@@ -87,6 +91,8 @@ class GrpcServer {
 
     // boot thread
     std::unique_ptr<std::thread> boot_thread_;
+
+    AsyncReqManager async_req_manager_;
 };
 
 } // namespace vpaxos

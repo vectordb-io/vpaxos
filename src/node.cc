@@ -86,6 +86,8 @@ Node::PingAll() {
 
 void
 Node::Sleep(int min, int max) const {
+    return;
+
     std::uniform_int_distribution<int> random_range(min, max);
     int timeout_ms = random_range(random_);
     LOG(INFO) << "sleep " << timeout_ms << " ms";

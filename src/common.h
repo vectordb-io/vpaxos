@@ -1,15 +1,19 @@
 #ifndef __VPAXOS_COMMON_H__
 #define __VPAXOS_COMMON_H__
 
+#include <sys/syscall.h>
 #include "status.h"
 #include "vpaxos_rpc.grpc.pb.h"
 
 namespace vpaxos {
 
+#define gettid() (syscall(SYS_gettid))
+
+
 using OnPingCallBack = std::function<void (const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply)>;
 using PingFinishCallBack = std::function<Status (vpaxos_rpc::PingReply)>;
 
-using OnProposeCallBack = std::function<void (const vpaxos_rpc::Propose &request, vpaxos_rpc::ProposeReply &reply)>;
+using OnProposeCallBack = std::function<void (const vpaxos_rpc::Propose &request, void *async_flag)>;
 
 using OnPrepareCallBack = std::function<void (const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply &reply)>;
 using PrepareFinishCallBack = std::function<Status (vpaxos_rpc::PrepareReply)>;

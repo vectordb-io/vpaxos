@@ -17,6 +17,29 @@ GrpcServer::~GrpcServer() {
     cq_out_->Shutdown();
 }
 
+Status
+GrpcServer::AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call) {
+
+    LOG(INFO) << "debug " << "call: " << call;
+
+    if (async_req_manager_.Has(call)) {
+
+        LOG(INFO) << "debug " << "has call: " << call;
+
+        AsyncTaskOnPropose *p = static_cast<AsyncTaskOnPropose*>(call);
+        p->done_ = true;
+        p->reply_.set_err_code(reply.err_code());
+        p->reply_.set_err_msg(reply.err_msg());
+        p->reply_.set_chosen_value(reply.chosen_value());
+        p->responder_.Finish(p->reply_, grpc::Status::OK, p);
+        async_req_manager_.Delete(p);
+    } else {
+        LOG(INFO) << "debug " << "has not call: " << call;
+    }
+
+    return Status::OK();
+}
+
 void
 GrpcServer::IntendOnLearn() {
     // optimizing by memory pool
@@ -86,13 +109,14 @@ GrpcServer::IntendOnPropose() {
     assert(on_propose_cb_);
     p->cb_ = on_propose_cb_;
     service_.RequestRpcPropose(&(p->ctx_), &(p->request_), &(p->responder_), p->cq_in_, p->cq_in_, p);
+
+    LOG(INFO) << "intend propose call:" << p;
 }
 
 void
 GrpcServer::OnPropose(AsyncTaskOnPropose *p) {
-    p->cb_(p->request_, p->reply_);
-    p->done_ = true;
-    p->responder_.Finish(p->reply_, grpc::Status::OK, p);
+    async_req_manager_.Add(p);
+    p->cb_(p->request_, p);
 }
 
 void
@@ -184,6 +208,13 @@ GrpcServer::StartService() {
 }
 
 Status
+GrpcServer::Init() {
+    auto s = async_req_manager_.Init();
+    assert(s.ok());
+    return Status::OK();
+}
+
+Status
 GrpcServer::Start() {
     LOG(INFO) << "grpc server start ...";
 
@@ -232,7 +263,8 @@ GrpcServer::ThreadAsyncCall() {
         assert(ok);
 
         if (p->GetStatus().ok()) {
-            p->Process();
+            //p->Process();
+            Env::GetInstance().thread_pool()->ProduceOne(std::bind(&AsyncTaskCall::Process, p));
         } else {
             LOG(ERROR) << "err:" << p->GetStatus().error_message();
         }

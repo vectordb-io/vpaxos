@@ -1,3 +1,4 @@
+#include <glog/logging.h>
 #include "env.h"
 #include "node.h"
 
@@ -9,6 +10,14 @@ Env::Env()
 }
 
 Env::~Env() {
+}
+
+Status
+Env::AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call) {
+    LOG(INFO) << "debug Env::AsyncProposeReply call:" << call;
+
+    auto s = grpc_server_.AsyncProposeReply(reply, call);
+    return s;
 }
 
 Status
@@ -40,7 +49,8 @@ Env::Init() {
     Status s;
     s = storage_.Init();
     assert(s.ok());
-
+    s = grpc_server_.Init();
+    assert(s.ok());
     return Status::OK();
 }
 

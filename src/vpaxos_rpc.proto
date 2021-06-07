@@ -25,8 +25,8 @@ message Propose {
 }
 
 message ProposeReply {
-  string msg = 1;
-  bool chosen = 2;
+  int32 err_code = 1;
+  string err_msg = 2;
   string chosen_value = 3;
 }
 
@@ -40,6 +40,7 @@ message Prepare {
 
   Ballot trace_ballot = 2;
   string address = 3;
+  uint64 async_flag = 4;
 }
 
 message PrepareReply {
@@ -52,6 +53,7 @@ message PrepareReply {
 
   Ballot trace_ballot = 6;
   string address = 7;
+  uint64 async_flag = 8;
 }
 
 message Accept {
@@ -60,6 +62,7 @@ message Accept {
 
   Ballot trace_ballot = 3;
   string address = 4;
+  uint64 async_flag = 5;
 }
 
 message AcceptReply {
@@ -69,6 +72,7 @@ message AcceptReply {
 
   Ballot trace_ballot = 4;
   string address = 5;
+  uint64 async_flag = 6;
 }
 
 message Learn {
