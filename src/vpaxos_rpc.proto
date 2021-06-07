@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package vpaxos_rpc;
+
+service VPaxos {
+  rpc RpcPing (Ping) returns (PingReply) {}
+  rpc RpcPropose(Propose) returns (ProposeReply) {}
+  rpc RpcPrepare(Prepare) returns (PrepareReply) {}
+  rpc RpcAccept(Accept) returns (AcceptReply) {}
+  rpc RpcLearn(Learn) returns (LearnReply) {}
+}
+
+message Ping {
+  string msg = 1;
+  string address = 2;
+}
+
+message PingReply {
+  string msg = 1;
+  string address = 2;
+}
+
+message Propose {
+  string value = 1;
+}
+
+message ProposeReply {
+  string msg = 1;
+  bool chosen = 2;
+  string chosen_value = 3;
+}
+
+message Ballot {
+  uint64 proposal_id = 1;
+  uint64 node_id = 2;
+}
+
+message Prepare {
+  Ballot ballot = 1;
+
+  Ballot trace_ballot = 2;
+  string address = 3;
+}
+
+message PrepareReply {
+  bool prepared = 1;
+  Ballot promised_ballot = 2;
+
+  bool ever_accepted = 3;
+  Ballot accepted_ballot = 4;
+  string accepted_value = 5;
+
+  Ballot trace_ballot = 6;
+  string address = 7;
+}
+
+message Accept {
+  Ballot ballot = 1;
+  string value = 2;
+
+  Ballot trace_ballot = 3;
+  string address = 4;
+}
+
+message AcceptReply {
+  bool accepted = 1;
+  Ballot accepted_ballot = 2;
+  string accepted_value = 3;
+
+  Ballot trace_ballot = 4;
+  string address = 5;
+}
+
+message Learn {
+  string chosen_value = 1;
+  string address = 2;
+}
+
+message LearnReply {
+  string msg = 1;
+  string address = 2;
+}
+
