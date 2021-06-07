@@ -1,2 +1,2 @@
 # vpaxos
-an implementation of Paxos algorithm, designed by TLA+ strictly.
+an implementation of Paxos algorithm, strictly designed according to TLA+.
