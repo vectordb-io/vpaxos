@@ -249,7 +249,11 @@ GrpcServer::ThreadAsyncCalled() {
         cq_in_->Next(&tag, &ok);
         assert(ok);
 
+
         AsyncTaskCalled *p = static_cast<AsyncTaskCalled*>(tag);
+
+        LOG(INFO) << "ThreadAsyncCalled call:" << p;
+
         p->Process();
     }
 }

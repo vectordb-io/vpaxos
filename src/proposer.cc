@@ -336,6 +336,8 @@ void
 Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
     DebugLog(false, __FUNCTION__, "x.x.x.x", &request);
 
+    LOG(INFO) << "OnPropose call:" << async_flag;
+
     if (proposing_) {
 
         LOG(INFO) << "debug: proposing call:" << async_flag;
@@ -433,11 +435,20 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
     Status s;
     Ballot receive_ballot;
     Pb2Ballot(reply.accepted_ballot(), receive_ballot);
-    if (receive_ballot != current_ballot_) {
-        LOG(INFO) << "error ballot: " << "current_ballot_:" << current_ballot_.ToString()
+
+
+    if (current_ballot_ > receive_ballot) {
+        LOG(INFO) << "old ballot: " << "current_ballot_:" << current_ballot_.ToString()
                   << " receive_ballot:" << receive_ballot.ToString();
         return Status::OK();
     }
+
+
+
+
+
+
+
 
     if (reply.accepted()) {
         accept_manager_.Vote(reply);

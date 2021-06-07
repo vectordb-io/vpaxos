@@ -137,6 +137,9 @@ Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &r
 
     } else {
         reply.set_accepted(false);
+
+        // add this line ???
+        Ballot2Pb(promised_ballot, *reply.mutable_accepted_ballot());
     }
 
     Ballot2Pb(receive_ballot, *reply.mutable_trace_ballot());
