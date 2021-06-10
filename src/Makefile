@@ -16,15 +16,23 @@ INCLUDES_THREAD_POOL_TEST=-I./
 LIBS_THREAD_POOL_TEST=-lglog -lprotobuf -lgrpc++ -lgrpc -lpthread -lleveldb
 LFLAGS_THREAD_POOL_TEST=-L/usr/local/lib
 
+OBJS_NODEID_TEST=nodeid_test.o 
+INCLUDES_NODEID_TEST=-I./
+LIBS_NODEID_TEST=
+LFLAGS_NODEID_TEST=
+
 cs: vpaxos_server vpaxos_client
 	@echo ""
 	@echo "success, go go go!"
 	@echo ""
 
-test: thread_pool_test 
+test: thread_pool_test nodeid_test
 	@echo ""
 	@echo "make $<"
 	@echo ""
+
+nodeid_test: $(OBJS_NODEID_TEST)
+	$(CC) $^ -o $@ $(LIBS_NODEID_TEST) $(LFLAGS_NODEID_TEST)
 
 thread_pool_test: $(OBJS_THREAD_POOL_TEST)
 	$(CC) $^ -o $@ $(LIBS_THREAD_POOL_TEST) $(LFLAGS_THREAD_POOL_TEST)
@@ -51,10 +59,12 @@ clean:
 	rm -rf vpaxos_server
 	rm -rf vpaxos_client
 	rm -rf thread_pool_test
+	rm -rf nodeid_test
 
 cleanall: clean
 	rm -f vpaxos_rpc.pb.*
 	rm -f vpaxos_rpc.grpc.pb.*
+
 
 
 
