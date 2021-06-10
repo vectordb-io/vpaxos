@@ -7,6 +7,7 @@
 #include <cstring>
 #include <cassert>
 #include <string>
+#include "jsonxx/json.hpp"
 
 namespace vpaxos {
 
@@ -54,6 +55,24 @@ class NodeId {
         char buf[128];
         snprintf(buf, sizeof(buf), "host:%s|port:%u|address:%s|code:%lu", host_.c_str(), port_, address_.c_str(), code_);
         return std::string(buf);
+    }
+
+    std::string ToJson() const {
+        jsonxx::json64 j;
+        j["host"] = host_;
+        j["port"] = port_;
+        j["address"] = address_;
+        j["code"] = code_;
+        return j.dump();
+    }
+
+    std::string ToJsonPretty() const {
+        jsonxx::json64 j;
+        j["host"] = host_;
+        j["port"] = port_;
+        j["address"] = address_;
+        j["code"] = code_;
+        return j.dump(4, ' ');
     }
 
   private:
