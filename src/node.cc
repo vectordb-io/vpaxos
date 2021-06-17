@@ -4,11 +4,16 @@
 #include <cassert>
 #include "env.h"
 #include "node.h"
+#include "coding.h"
 #include "config.h"
 
 namespace vpaxos {
 
 std::default_random_engine random_(time(nullptr));
+
+Node::Node()
+    :id_(Config::GetInstance().MyAddress()->ToString()) {
+}
 
 Status
 Node::Init() {
@@ -47,12 +52,13 @@ Node::OnPing(const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply) {
     } else {
         reply.set_msg("no sounds");
     }
-    LOG(INFO) << "send to " << request.address() << ": " << reply.msg();
+
+    TraceOnPing(request, reply);
 }
 
 Status
 Node::Ping(const vpaxos_rpc::Ping &request, const std::string &address) {
-    LOG(INFO) << "send to " << address << ": " << request.msg();
+    TracePing(request, address);
     auto s = Env::GetInstance().AsyncPing(
                  request,
                  address,
@@ -63,7 +69,7 @@ Node::Ping(const vpaxos_rpc::Ping &request, const std::string &address) {
 
 Status
 Node::OnPingReply(const vpaxos_rpc::PingReply &reply) {
-    LOG(INFO) << "receive from " << reply.address() << ": " << reply.msg();
+    TraceOnPingReply(reply);
     return Status::OK();
 }
 
@@ -92,6 +98,49 @@ Node::Sleep(int min, int max) const {
     int timeout_ms = random_range(random_);
     LOG(INFO) << "sleep " << timeout_ms << " ms";
     std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
+}
+
+void
+Node::TracePing(const vpaxos_rpc::Ping &request, const std::string &address) const {
+    std::string s;
+    s.append("nd:");
+    s.append(id_.ToStringTiny());
+    s.append(" trace node:");
+    s.append("  st:");
+    s.append(address);
+    s.append(":");
+    s.append(ToStringTiny(request));
+    LOG(INFO) << s;
+}
+
+void
+Node::TraceOnPing(const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply) const {
+    std::string s;
+    s.append("nd:");
+    s.append(id_.ToStringTiny());
+    s.append(" trace node:");
+    s.append("  rf:");
+    s.append(request.address());
+    s.append(":");
+    s.append(ToStringTiny(request));
+    s.append("  st:");
+    s.append(request.address());
+    s.append(":");
+    s.append(ToStringTiny(reply));
+    LOG(INFO) << s;
+}
+
+void
+Node::TraceOnPingReply(const vpaxos_rpc::PingReply &reply) const {
+    std::string s;
+    s.append("nd:");
+    s.append(id_.ToStringTiny());
+    s.append(" trace node:");
+    s.append("  rf:");
+    s.append(reply.address());
+    s.append(":");
+    s.append(ToStringTiny(reply));
+    LOG(INFO) << s;
 }
 
 } // namespace vpaxos

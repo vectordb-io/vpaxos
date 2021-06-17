@@ -14,7 +14,8 @@
 
 std::string exe_name;
 
-void PrintHelp() {
+void
+PrintHelp() {
     std::cout << std::endl;
     std::cout << "Usage: " << std::endl;
 
@@ -34,7 +35,8 @@ void PrintHelp() {
     std::cout << std::endl;
 }
 
-int main(int argc, char** argv) {
+int
+main(int argc, char** argv) {
     vpaxos::Status s;
     FLAGS_alsologtostderr = true;
     google::InitGoogleLogging(argv[0]);

@@ -63,25 +63,20 @@ Storage::MaxBallot(Ballot &ballot) const {
         return Status::NotFound(Key_Proposer_MaxBallot);
     }
 
-    bool ret = DecodeBallot(buf, ballot);
+    bool ret = Str2Ballot(buf, ballot);
     assert(ret);
     return Status::OK();
 }
 
 Status
 Storage::PersistMaxBallot(const Ballot &ballot) {
-    std::string buf;
-    EncodeBallot(buf, ballot);
+    std::string str;
+    Ballot2Str(ballot, str);
 
     leveldb::WriteOptions wo;
     wo.sync = true;
-    auto s = db_->Put(wo, Key_Proposer_MaxBallot, buf);
+    auto s = db_->Put(wo, Key_Proposer_MaxBallot, str);
     assert(s.ok());
-
-
-    LOG(INFO) << "debug PersistMaxBallot" << ballot.ToString();
-
-
 
     return Status::OK();
 }
@@ -96,22 +91,20 @@ Storage::PromisedBallot(Ballot &ballot) const {
         return Status::NotFound(Key_Acceptor_PromisedBallot);
     }
 
-    bool ret = DecodeBallot(buf, ballot);
+    bool ret = Str2Ballot(buf, ballot);
     assert(ret);
     return Status::OK();
 }
 
 Status
 Storage::PersistPromisedBallot(const Ballot &ballot) {
-    std::string buf;
-    EncodeBallot(buf, ballot);
+    std::string str;
+    Ballot2Str(ballot, str);
 
     leveldb::WriteOptions wo;
     wo.sync = true;
-    auto s = db_->Put(wo, Key_Acceptor_PromisedBallot, buf);
+    auto s = db_->Put(wo, Key_Acceptor_PromisedBallot, str);
     assert(s.ok());
-
-    LOG(INFO) << "debug PersistPromisedBallot " << ballot.ToString();
 
     return Status::OK();
 }
@@ -135,19 +128,19 @@ Storage::AcceptedBallot(Ballot &ballot) const {
         return Status::NotFound(Key_Acceptor_AcceptedBallot);
     }
 
-    bool ret = DecodeBallot(buf, ballot);
+    bool ret = Str2Ballot(buf, ballot);
     assert(ret);
     return Status::OK();
 }
 
 Status
 Storage::PersistAcceptedBallot(const Ballot &ballot) {
-    std::string buf;
-    EncodeBallot(buf, ballot);
+    std::string str;
+    Ballot2Str(ballot, str);
 
     leveldb::WriteOptions wo;
     wo.sync = true;
-    auto s = db_->Put(wo, Key_Acceptor_AcceptedBallot, buf);
+    auto s = db_->Put(wo, Key_Acceptor_AcceptedBallot, str);
     assert(s.ok());
 
     return Status::OK();

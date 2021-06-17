@@ -9,7 +9,6 @@ namespace vpaxos {
 
 #define gettid() (syscall(SYS_gettid))
 
-
 using OnPingCallBack = std::function<void (const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply)>;
 using PingFinishCallBack = std::function<Status (vpaxos_rpc::PingReply)>;
 

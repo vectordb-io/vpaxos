@@ -51,28 +51,31 @@ class NodeId {
         return code_;
     }
 
+    jsonxx::json64 ToJson() const {
+        jsonxx::json64 j;
+        j["host"] = host_;
+        j["port"] = port_;
+        j["address"] = address_;
+        j["code"] = code_;
+        return j;
+    }
+
     std::string ToString() const {
-        char buf[128];
-        snprintf(buf, sizeof(buf), "host:%s|port:%u|address:%s|code:%lu", host_.c_str(), port_, address_.c_str(), code_);
-        return std::string(buf);
+        return ToJson().dump();
     }
 
-    std::string ToJson() const {
-        jsonxx::json64 j;
-        j["host"] = host_;
-        j["port"] = port_;
-        j["address"] = address_;
-        j["code"] = code_;
-        return j.dump();
+    std::string ToStringPretty() const {
+        return ToJson().dump(4, ' ');
     }
 
-    std::string ToJsonPretty() const {
+    jsonxx::json64 ToJsonTiny() const {
         jsonxx::json64 j;
-        j["host"] = host_;
-        j["port"] = port_;
-        j["address"] = address_;
-        j["code"] = code_;
-        return j.dump(4, ' ');
+        j["addr"] = address_;
+        return j;
+    }
+
+    std::string ToStringTiny() const {
+        return ToJsonTiny().dump();
     }
 
   private:

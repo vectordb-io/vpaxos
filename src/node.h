@@ -9,6 +9,7 @@
 #include "proposer.h"
 #include "acceptor.h"
 #include "learner.h"
+#include "nodeid.h"
 #include "vpaxos_rpc.grpc.pb.h"
 
 namespace vpaxos {
@@ -22,11 +23,8 @@ class Node {
         return instance;
     }
 
-    Node() = default;
-    ~Node() {}
     Node(const Node&) = delete;
     Node& operator=(const Node&) = delete;
-
     Status Init();
     uint64_t Id();
 
@@ -47,12 +45,24 @@ class Node {
         return &learner_;
     }
 
+    const NodeId &id() const {
+        return id_;
+    }
+
     void Sleep(int min, int max) const;
 
   private:
+    Node();
+    ~Node() = default;
+
+    void TracePing(const vpaxos_rpc::Ping &request, const std::string &address) const;
+    void TraceOnPing(const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply) const;
+    void TraceOnPingReply(const vpaxos_rpc::PingReply &reply) const;
+
     Proposer proposer_;
     Acceptor acceptor_;
     Learner learner_;
+    NodeId id_;
 };
 
 

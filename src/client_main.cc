@@ -1,14 +1,37 @@
+#include <sys/syscall.h>
+#include <cstdio>
 #include <random>
 #include <string>
 #include <thread>
 #include <glog/logging.h>
 #include <grpcpp/grpcpp.h>
+#include "coding.h"
 #include "vpaxos_rpc.grpc.pb.h"
 
+#define gettid() (syscall(SYS_gettid))
 
 std::default_random_engine random_(time(nullptr));
 
-void Propose(std::string address, std::string value) {
+void
+TracePropose(const std::string &address, const vpaxos_rpc::Propose &request, vpaxos_rpc::ProposeReply &reply) {
+    std::string s;
+    char buf[128];
+    snprintf(buf, sizeof(buf), "tid:%ld ", gettid());
+    s.append(std::string(buf));
+
+    s.append("  st:");
+    s.append(address);
+    s.append(":");
+    s.append(vpaxos::ToString(request));
+    s.append("  rf:");
+    s.append(address);
+    s.append(":");
+    s.append(vpaxos::ToString(reply));
+    LOG(INFO) << s;
+}
+
+void
+Propose(const std::string &address, const std::string &value) {
     std::uniform_int_distribution<int> random_range(100, 500);
     int timeout_ms = random_range(random_);
     std::cout << "sleep " << timeout_ms << " ms" << std::endl;
@@ -24,33 +47,15 @@ void Propose(std::string address, std::string value) {
     grpc::ClientContext context;
     grpc::Status s = stub->RpcPropose(&context, request, &reply);
 
-    char buf[256];
-    snprintf(buf, sizeof(buf), "err_code:%d | err_msg:%s | chosen_value:%s", reply.err_code(), reply.err_msg().c_str(), reply.chosen_value().c_str());
-    LOG(INFO) << "receive: " << std::string(buf);
+    TracePropose(address, request, reply);
 }
 
-int main(int argc, char **argv) {
+
+
+int
+main(int argc, char **argv) {
     FLAGS_alsologtostderr = true;
     google::InitGoogleLogging(argv[0]);
-
-    /*
-    std::shared_ptr<grpc::Channel> channel = grpc::CreateChannel("127.0.0.1:38000", grpc::InsecureChannelCredentials());
-    std::unique_ptr<vpaxos_rpc::VPaxos::Stub> stub = vpaxos_rpc::VPaxos::NewStub(channel);
-
-    vpaxos_rpc::Ping request;
-    vpaxos_rpc::PingReply reply;
-    request.set_msg("ping");
-    request.set_address("haha");
-
-    grpc::ClientContext context;
-    grpc::Status s = stub->RpcPing(&context, request, &reply);
-
-    LOG(INFO) << "receive from " << reply.address() << ": " << reply.msg();
-    */
-
-    //std::thread t3(std::bind(Propose, "127.0.0.1:38002", "2222"));
-    //t3.join();
-
 
     std::thread t1(std::bind(Propose, "127.0.0.1:38000", "0000"));
     std::thread t2(std::bind(Propose, "127.0.0.1:38001", "1111"));
