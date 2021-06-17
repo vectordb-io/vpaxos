@@ -94,4 +94,4 @@ Node::Sleep(int min, int max) const {
     std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

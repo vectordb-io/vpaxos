@@ -38,6 +38,6 @@ class ThreadPool {
     bool running_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

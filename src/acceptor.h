@@ -21,14 +21,14 @@ class Acceptor {
     void OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &reply);
 
     Status PromisedBallot(Ballot &ballot) const;
-    Status StorePromisedBallot(const Ballot &ballot);
+    Status PersistPromisedBallot(const Ballot &ballot);
 
     Status AcceptedBallot(Ballot &ballot) const;
-    Status StoreAcceptedBallot(const Ballot &ballot);
+    Status PersistAcceptedBallot(const Ballot &ballot);
 
     bool HasAcceptedValue() const;
     Status AcceptedValue(std::string &accepted_value) const;
-    Status StoreAcceptedValue(const std::string &accepted_value);
+    Status PersistAcceptedValue(const std::string &accepted_value);
 
     void DebugLog(bool is_send, std::string header, std::string address, const google::protobuf::Message *m);
 
@@ -36,6 +36,6 @@ class Acceptor {
 
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

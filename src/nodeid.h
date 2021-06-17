@@ -116,6 +116,6 @@ class NodeId {
     uint64_t code_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

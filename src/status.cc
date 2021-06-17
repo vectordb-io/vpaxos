@@ -67,4 +67,4 @@ std::string Status::ToString() const {
     }
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

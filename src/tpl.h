@@ -4,6 +4,6 @@
 namespace vpaxos {
 
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

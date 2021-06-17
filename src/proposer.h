@@ -79,7 +79,6 @@ class Proposer {
     Status AcceptAll(void *flag);
 
     void OnPropose(const vpaxos_rpc::Propose &request, void *async_flag);
-
     Status Prepare(const vpaxos_rpc::Prepare &request, const std::string &address);
     Status OnPrepareReply(const vpaxos_rpc::PrepareReply &reply);
     Status Accept(const vpaxos_rpc::Accept &request, const std::string &address);
@@ -87,7 +86,7 @@ class Proposer {
 
   private:
     Status MaxBallot(Ballot &ballot) const;
-    Status StoreMaxBallot(const Ballot &ballot);
+    Status PersistMaxBallot(const Ballot &ballot);
     void NextBallot();
     void NextBallot(Ballot b);
     void DebugLog(bool is_send, std::string header, std::string address, const google::protobuf::Message *m);
@@ -99,6 +98,6 @@ class Proposer {
     AcceptManager accept_manager_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

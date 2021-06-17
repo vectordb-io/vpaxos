@@ -98,6 +98,6 @@ class Ballot {
     uint64_t node_id_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

@@ -28,6 +28,6 @@ class AsyncReqManager {
     mutable std::mutex mutex_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

@@ -24,6 +24,6 @@ using AcceptFinishCallBack = std::function<Status (vpaxos_rpc::AcceptReply)>;
 using OnLearnCallBack = std::function<void (const vpaxos_rpc::Learn &request, vpaxos_rpc::LearnReply &reply)>;
 using LearnFinishCallBack = std::function<Status (vpaxos_rpc::LearnReply)>;
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

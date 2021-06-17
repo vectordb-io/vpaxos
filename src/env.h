@@ -29,28 +29,29 @@ class Env {
     Status AsyncPrepare(const vpaxos_rpc::Prepare &request, const std::string &address, PrepareFinishCallBack cb);
     Status AsyncAccept(const vpaxos_rpc::Accept &request, const std::string &address, AcceptFinishCallBack cb);
     Status AsyncLearn(const vpaxos_rpc::Learn &request, const std::string &address, LearnFinishCallBack cb);
-
     Status AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call);
 
     // storage
     // for proposer
     Status MaxBallot(Ballot &ballot) const;
-    Status StoreMaxBallot(const Ballot &ballot);
+    Status PersistMaxBallot(const Ballot &ballot);
 
     // for acceptor
     Status PromisedBallot(Ballot &ballot) const;
-    Status StorePromisedBallot(const Ballot &ballot);
+    Status PersistPromisedBallot(const Ballot &ballot);
     bool HasPromisedBallot();
+
     Status AcceptedBallot(Ballot &ballot) const;
-    Status StoreAcceptedBallot(const Ballot &ballot);
+    Status PersistAcceptedBallot(const Ballot &ballot);
     bool HasAcceptedBallot();
+
     Status AcceptedValue(std::string &accepted_value) const;
-    Status StoreAcceptedValue(const std::string &accepted_value);
+    Status PersistAcceptedValue(const std::string &accepted_value);
     bool HasAcceptedValue() const;
 
     // for proposer, acceptor, learner
     Status ChosenValue(std::string &chosen_value) const;
-    Status StoreChosenValue(const std::string &chosen_value);
+    Status PersistChosenValue(const std::string &chosen_value);
     bool HasChosenValue() const;
 
     ThreadPool* thread_pool() {
@@ -77,6 +78,6 @@ class Env {
     GrpcServer grpc_server_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

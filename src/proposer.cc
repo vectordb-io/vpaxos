@@ -233,7 +233,7 @@ Proposer::Init() {
         current_ballot_ = max_ballot;
     } else if (s.IsNotFound()) {
         current_ballot_.Init(0, Node::GetInstance().Id());
-        s = StoreMaxBallot(current_ballot_);
+        s = PersistMaxBallot(current_ballot_);
         assert(s.ok());
     } else {
         assert(0);
@@ -248,7 +248,7 @@ Proposer::NextBallot() {
     s = MaxBallot(current_ballot_);
     assert(s.ok());
     current_ballot_++;
-    s = StoreMaxBallot(current_ballot_);
+    s = PersistMaxBallot(current_ballot_);
     assert(s.ok());
 }
 
@@ -267,7 +267,7 @@ Proposer::NextBallot(Ballot b) {
         current_ballot_++;
     }
 
-    s = StoreMaxBallot(current_ballot_);
+    s = PersistMaxBallot(current_ballot_);
     assert(s.ok());
 
 
@@ -511,8 +511,8 @@ Proposer::MaxBallot(Ballot &ballot) const {
 }
 
 Status
-Proposer::StoreMaxBallot(const Ballot &ballot) {
-    auto s = Env::GetInstance().StoreMaxBallot(ballot);
+Proposer::PersistMaxBallot(const Ballot &ballot) {
+    auto s = Env::GetInstance().PersistMaxBallot(ballot);
     return s;
 }
 
@@ -587,4 +587,4 @@ Proposer::DebugLog(bool is_send, std::string header, std::string address, const 
     LOG(INFO) << str;
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

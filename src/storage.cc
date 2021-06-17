@@ -35,7 +35,7 @@ Storage::ChosenValue(std::string &chosen_value) const {
 }
 
 Status
-Storage::StoreChosenValue(const std::string &chosen_value) {
+Storage::PersistChosenValue(const std::string &chosen_value) {
     leveldb::WriteOptions wo;
     wo.sync = true;
     auto s = db_->Put(wo, Key_Chosen_Value, chosen_value);
@@ -69,7 +69,7 @@ Storage::MaxBallot(Ballot &ballot) const {
 }
 
 Status
-Storage::StoreMaxBallot(const Ballot &ballot) {
+Storage::PersistMaxBallot(const Ballot &ballot) {
     std::string buf;
     EncodeBallot(buf, ballot);
 
@@ -79,7 +79,7 @@ Storage::StoreMaxBallot(const Ballot &ballot) {
     assert(s.ok());
 
 
-    LOG(INFO) << "debug StoreMaxBallot" << ballot.ToString();
+    LOG(INFO) << "debug PersistMaxBallot" << ballot.ToString();
 
 
 
@@ -102,7 +102,7 @@ Storage::PromisedBallot(Ballot &ballot) const {
 }
 
 Status
-Storage::StorePromisedBallot(const Ballot &ballot) {
+Storage::PersistPromisedBallot(const Ballot &ballot) {
     std::string buf;
     EncodeBallot(buf, ballot);
 
@@ -111,7 +111,7 @@ Storage::StorePromisedBallot(const Ballot &ballot) {
     auto s = db_->Put(wo, Key_Acceptor_PromisedBallot, buf);
     assert(s.ok());
 
-    LOG(INFO) << "debug StorePromisedBallot " << ballot.ToString();
+    LOG(INFO) << "debug PersistPromisedBallot " << ballot.ToString();
 
     return Status::OK();
 }
@@ -141,7 +141,7 @@ Storage::AcceptedBallot(Ballot &ballot) const {
 }
 
 Status
-Storage::StoreAcceptedBallot(const Ballot &ballot) {
+Storage::PersistAcceptedBallot(const Ballot &ballot) {
     std::string buf;
     EncodeBallot(buf, ballot);
 
@@ -173,7 +173,7 @@ Storage::AcceptedValue(std::string &accepted_value) const {
 }
 
 Status
-Storage::StoreAcceptedValue(const std::string &accepted_value) {
+Storage::PersistAcceptedValue(const std::string &accepted_value) {
     leveldb::WriteOptions wo;
     wo.sync = true;
     auto s = db_->Put(wo, Key_Acceptor_AcceptedValue, accepted_value);
@@ -191,4 +191,4 @@ Storage::HasAcceptedValue() const {
     return !s.IsNotFound();
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

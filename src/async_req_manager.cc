@@ -32,4 +32,4 @@ AsyncReqManager::Has(void *p) const {
     return  (it != ptrs_.end());
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

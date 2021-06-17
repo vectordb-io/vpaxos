@@ -14,6 +14,6 @@ void EncodeBallot(std::string &buf, const Ballot &ballot);
 bool DecodeBallot(const std::string &buf, Ballot &ballot);
 
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

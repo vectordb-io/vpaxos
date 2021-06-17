@@ -77,4 +77,4 @@ ThreadPool::ConsumeOne() {
     task();
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

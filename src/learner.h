@@ -21,7 +21,7 @@ class Learner {
 
     bool Chosen() const;
     Status ChosenValue(std::string &chosen_value) const;
-    Status StoreChosenValue(const std::string &chosen_value);
+    Status PersistChosenValue(const std::string &chosen_value);
 
     void DebugLogRecv(std::string header, const google::protobuf::Message *m);
     void DebugLogSend(std::string header, std::string address, const google::protobuf::Message *m);
@@ -29,6 +29,6 @@ class Learner {
   private:
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

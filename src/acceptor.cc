@@ -23,13 +23,13 @@ Acceptor::Init() {
 
     s = PromisedBallot(ballot);
     if (s.IsNotFound()) {
-        s = StorePromisedBallot(Ballot());
+        s = PersistPromisedBallot(Ballot());
         assert(s.ok());
     }
 
     s = AcceptedBallot(ballot);
     if (s.IsNotFound()) {
-        s = StoreAcceptedBallot(Ballot());
+        s = PersistAcceptedBallot(Ballot());
         assert(s.ok());
     }
 
@@ -64,7 +64,7 @@ Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply
         LOG(INFO) << "debug agree";
 
 
-        s = StorePromisedBallot(receive_ballot);
+        s = PersistPromisedBallot(receive_ballot);
         assert(s.ok());
         reply.set_prepared(true);
         Ballot2Pb(receive_ballot, *reply.mutable_promised_ballot());
@@ -124,11 +124,11 @@ Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &r
         }
         //----------------------------------------------------------
 
-        s = StorePromisedBallot(receive_ballot);
+        s = PersistPromisedBallot(receive_ballot);
         assert(s.ok());
-        s = StoreAcceptedBallot(receive_ballot);
+        s = PersistAcceptedBallot(receive_ballot);
         assert(s.ok());
-        s = StoreAcceptedValue(request.value());
+        s = PersistAcceptedValue(request.value());
         assert(s.ok());
 
         reply.set_accepted(true);
@@ -156,8 +156,8 @@ Acceptor::PromisedBallot(Ballot &ballot) const {
 }
 
 Status
-Acceptor::StorePromisedBallot(const Ballot &ballot) {
-    auto s = Env::GetInstance().StorePromisedBallot(ballot);
+Acceptor::PersistPromisedBallot(const Ballot &ballot) {
+    auto s = Env::GetInstance().PersistPromisedBallot(ballot);
     return s;
 }
 
@@ -168,8 +168,8 @@ Acceptor::AcceptedBallot(Ballot &ballot) const {
 }
 
 Status
-Acceptor::StoreAcceptedBallot(const Ballot &ballot) {
-    auto s = Env::GetInstance().StoreAcceptedBallot(ballot);
+Acceptor::PersistAcceptedBallot(const Ballot &ballot) {
+    auto s = Env::GetInstance().PersistAcceptedBallot(ballot);
     return s;
 }
 
@@ -180,8 +180,8 @@ Acceptor::AcceptedValue(std::string &accepted_value) const {
 }
 
 Status
-Acceptor::StoreAcceptedValue(const std::string &accepted_value) {
-    auto s = Env::GetInstance().StoreAcceptedValue(accepted_value);
+Acceptor::PersistAcceptedValue(const std::string &accepted_value) {
+    auto s = Env::GetInstance().PersistAcceptedValue(accepted_value);
     return s;
 }
 
@@ -271,4 +271,4 @@ Acceptor::DebugLog(bool is_send, std::string header, std::string address, const 
     LOG(INFO) << str;
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

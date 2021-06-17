@@ -94,8 +94,8 @@ Env::MaxBallot(Ballot &ballot) const {
 }
 
 Status
-Env::StoreMaxBallot(const Ballot &ballot) {
-    auto s = storage_.StoreMaxBallot(ballot);
+Env::PersistMaxBallot(const Ballot &ballot) {
+    auto s = storage_.PersistMaxBallot(ballot);
     return s;
 }
 
@@ -106,8 +106,8 @@ Env::ChosenValue(std::string &chosen_value) const {
 }
 
 Status
-Env::StoreChosenValue(const std::string &chosen_value) {
-    auto s = storage_.StoreChosenValue(chosen_value);
+Env::PersistChosenValue(const std::string &chosen_value) {
+    auto s = storage_.PersistChosenValue(chosen_value);
     return s;
 }
 
@@ -124,8 +124,8 @@ Env::PromisedBallot(Ballot &ballot) const {
 }
 
 Status
-Env::StorePromisedBallot(const Ballot &ballot) {
-    auto s = storage_.StorePromisedBallot(ballot);
+Env::PersistPromisedBallot(const Ballot &ballot) {
+    auto s = storage_.PersistPromisedBallot(ballot);
     return s;
 }
 
@@ -142,8 +142,8 @@ Env::AcceptedBallot(Ballot &ballot) const {
 }
 
 Status
-Env::StoreAcceptedBallot(const Ballot &ballot) {
-    auto s = storage_.StoreAcceptedBallot(ballot);
+Env::PersistAcceptedBallot(const Ballot &ballot) {
+    auto s = storage_.PersistAcceptedBallot(ballot);
     return s;
 }
 
@@ -160,8 +160,8 @@ Env::AcceptedValue(std::string &accepted_value) const {
 }
 
 Status
-Env::StoreAcceptedValue(const std::string &accepted_value) {
-    auto s = storage_.StoreAcceptedValue(accepted_value);
+Env::PersistAcceptedValue(const std::string &accepted_value) {
+    auto s = storage_.PersistAcceptedValue(accepted_value);
     return s;
 }
 
@@ -171,4 +171,4 @@ Env::HasAcceptedValue() const {
     return s;
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

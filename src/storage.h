@@ -31,24 +31,24 @@ class Storage {
 
     // only proposer call these methods
     Status MaxBallot(Ballot &ballot) const;
-    Status StoreMaxBallot(const Ballot &ballot);
+    Status PersistMaxBallot(const Ballot &ballot);
 
     // only acceptor call these methods
     Status PromisedBallot(Ballot &ballot) const;
-    Status StorePromisedBallot(const Ballot &ballot);
+    Status PersistPromisedBallot(const Ballot &ballot);
     bool HasPromisedBallot();
 
     Status AcceptedBallot(Ballot &ballot) const;
-    Status StoreAcceptedBallot(const Ballot &ballot);
+    Status PersistAcceptedBallot(const Ballot &ballot);
     bool HasAcceptedBallot();
 
     Status AcceptedValue(std::string &accepted_value) const;
-    Status StoreAcceptedValue(const std::string &accepted_value);
+    Status PersistAcceptedValue(const std::string &accepted_value);
     bool HasAcceptedValue() const;
 
     // proposer, acceptor, learner can call these methods
     Status ChosenValue(std::string &chosen_value) const;
-    Status StoreChosenValue(const std::string &chosen_value);
+    Status PersistChosenValue(const std::string &chosen_value);
     bool HasChosenValue() const;
 
   private:
@@ -56,6 +56,6 @@ class Storage {
     leveldb::DB* db_;
 };
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

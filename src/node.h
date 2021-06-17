@@ -56,6 +56,6 @@ class Node {
 };
 
 
-}  // namespace vpaxos
+} // namespace vpaxos
 
 #endif

@@ -19,7 +19,7 @@ Learner::Init() {
 void
 Learner::OnLearn(const vpaxos_rpc::Learn &request, vpaxos_rpc::LearnReply &reply) {
     LOG(INFO) << "value learned: [" << request.chosen_value() << "]";
-    auto s = StoreChosenValue(request.chosen_value());
+    auto s = PersistChosenValue(request.chosen_value());
     if (s.ok()) {
         reply.set_msg("ok");
     } else {
@@ -69,8 +69,8 @@ Learner::ChosenValue(std::string &chosen_value) const {
 }
 
 Status
-Learner::StoreChosenValue(const std::string &value) {
-    auto s = Env::GetInstance().StoreChosenValue(value);
+Learner::PersistChosenValue(const std::string &value) {
+    auto s = Env::GetInstance().PersistChosenValue(value);
     return s;
 }
 
@@ -125,4 +125,4 @@ Learner::DebugLogSend(std::string header, std::string address, const google::pro
     LOG(INFO) << "";
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos

@@ -30,4 +30,4 @@ bool DecodeBallot(const std::string &buf, Ballot &ballot) {
     return ret;
 }
 
-}  // namespace vpaxos
+} // namespace vpaxos
