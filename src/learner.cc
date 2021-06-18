@@ -1,5 +1,6 @@
 #include "env.h"
 #include "node.h"
+#include "coding.h"
 #include "learner.h"
 
 namespace vpaxos {
@@ -12,23 +13,24 @@ Learner::Init() {
     Env::GetInstance().grpc_server()->set_on_learn_cb(
         std::bind(&Learner::OnLearn, this, std::placeholders::_1, std::placeholders::_2)
     );
-
     return Status::OK();
 }
 
 void
 Learner::OnLearn(const vpaxos_rpc::Learn &request, vpaxos_rpc::LearnReply &reply) {
-    LOG(INFO) << "value learned: [" << request.chosen_value() << "]";
+    TraceOnLearn(request);
     auto s = PersistChosenValue(request.chosen_value());
     if (s.ok()) {
         reply.set_msg("ok");
     } else {
         reply.set_msg("error");
     }
+    TraceLearnReply(reply, request.address());
 }
 
 Status
 Learner::Learn(const vpaxos_rpc::Learn &request, const std::string &address) {
+    TraceLearn(request, address);
     auto s = Env::GetInstance().AsyncLearn(
                  request,
                  address,
@@ -39,7 +41,7 @@ Learner::Learn(const vpaxos_rpc::Learn &request, const std::string &address) {
 
 Status
 Learner::OnLearnReply(const vpaxos_rpc::LearnReply &reply) {
-    LOG(INFO) << "receive from " << reply.address() << ": " << reply.msg();
+    TraceOnLearnReply(reply);
     return Status::OK();
 }
 
@@ -74,55 +76,148 @@ Learner::PersistChosenValue(const std::string &value) {
     return s;
 }
 
-void
-Learner::DebugLogRecv(std::string header, const google::protobuf::Message *m) {
-    LOG(INFO) << "";
-    LOG(INFO) << "|-----------receive message---------------|";
-    LOG(INFO) << header;
-    LOG(INFO) << "my address: " << Config::GetInstance().MyAddress()->ToString();
-    LOG(INFO) << "my node_id: " << Node::GetInstance().Id();
+//------------------------------------------------------------------------------------
+//for debug
 
-    Status s;
-    std::string store_chosen_value;
-    s = ChosenValue(store_chosen_value);
-    if (s.ok()) {
-        LOG(INFO) << "store_chosen_value: " << "[" << store_chosen_value << "]";
-    } else if (s.IsNotFound()) {
-        LOG(INFO) << "store_chosen_value: null";
-    } else {
-        assert(0);
+jsonxx::json64
+Learner::ToJson() const {
+    std::string chosen_value;
+    if (Chosen()) {
+        auto s = ChosenValue(chosen_value);
+        assert(s.ok());
     }
+    jsonxx::json64 j;
+    j["Learner"]["chosen_value"] = chosen_value;
+    return j;
+}
 
-    std::string msg = "msg:\n<<\n" + m->DebugString() + ">>\n";
-    LOG(INFO) << msg;
-    LOG(INFO) << "|-----------------------------------------|";
-    LOG(INFO) << "";
+std::string
+Learner::ToString() const {
+    return ToJson().dump();
+}
+
+std::string
+Learner::ToStringPretty() const {
+    return ToJson().dump(4, ' ');
+}
+
+jsonxx::json64
+Learner::ToJsonTiny() const {
+    std::string chosen_value;
+    if (Chosen()) {
+        auto s = ChosenValue(chosen_value);
+        assert(s.ok());
+    }
+    jsonxx::json64 j;
+    j["Learner"]["chosen_value"] = chosen_value;
+    return j;
+}
+
+std::string
+Learner::ToStringTiny() const {
+    return ToJsonTiny().dump();
 }
 
 void
-Learner::DebugLogSend(std::string header, std::string address, const google::protobuf::Message *m) {
-    LOG(INFO) << "";
-    LOG(INFO) << "|--------------send message---------------|";
-    LOG(INFO) << header;
-    LOG(INFO) << "to address: " << address;
-    LOG(INFO) << "my address: " << Config::GetInstance().MyAddress()->ToString();
-    LOG(INFO) << "my node_id: " << Node::GetInstance().Id();
-
-    Status s;
-    std::string store_chosen_value;
-    s = ChosenValue(store_chosen_value);
-    if (s.ok()) {
-        LOG(INFO) << "store_chosen_value: " << "[" << store_chosen_value << "]";
-    } else if (s.IsNotFound()) {
-        LOG(INFO) << "store_chosen_value: null";
-    } else {
-        assert(0);
-    }
-
-    std::string msg = "msg:\n<<\n" + m->DebugString() + ">>\n";
-    LOG(INFO) << msg;
-    LOG(INFO) << "|-----------------------------------------|";
-    LOG(INFO) << "";
+Learner::TraceOnLearn(const vpaxos_rpc::Learn &request) const {
+    TraceOnLearnMini(request);
+    TraceOnLearnTiny(request);
+    TraceOnLearnVerbose(request);
 }
+
+void
+Learner::TraceOnLearnMini(const vpaxos_rpc::Learn &request) const {
+    std::string s;
+    s.append(" mini trace learner : ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-").append(request.address()).append("-").append(::vpaxos::ToStringMini(request));
+    LOG(INFO) << s;
+}
+
+void
+Learner::TraceOnLearnTiny(const vpaxos_rpc::Learn &request) const {
+
+}
+
+void
+Learner::TraceOnLearnVerbose(const vpaxos_rpc::Learn &request) const {
+
+}
+
+void
+Learner::TraceLearnReply(const vpaxos_rpc::LearnReply &reply, const std::string &address) const {
+    TraceLearnReplyMini(reply, address);
+    TraceLearnReplyTiny(reply, address);
+    TraceLearnReplyVerbose(reply, address);
+}
+
+void
+Learner::TraceLearnReplyMini(const vpaxos_rpc::LearnReply &reply, const std::string &address) const {
+    std::string s;
+    s.append(" mini trace learner : ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    Send To -").append(address).append("-").append(::vpaxos::ToStringMini(reply));
+    LOG(INFO) << s;
+}
+
+void
+Learner::TraceLearnReplyTiny(const vpaxos_rpc::LearnReply &reply, const std::string &address) const {
+
+}
+
+void
+Learner::TraceLearnReplyVerbose(const vpaxos_rpc::LearnReply &reply, const std::string &address) const {
+
+}
+
+void
+Learner::TraceLearn(const vpaxos_rpc::Learn &request, const std::string &address) const {
+    TraceLearnMini(request, address);
+    TraceLearnTiny(request, address);
+    TraceLearnVerbose(request, address);
+}
+
+void
+Learner::TraceLearnMini(const vpaxos_rpc::Learn &request, const std::string &address) const {
+    std::string s;
+    s.append(" mini trace learner : ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    Send To -").append(address).append("-").append(::vpaxos::ToStringMini(request));
+    LOG(INFO) << s;
+}
+
+void
+Learner::TraceLearnTiny(const vpaxos_rpc::Learn &request, const std::string &address) const {
+
+}
+
+void
+Learner::TraceLearnVerbose(const vpaxos_rpc::Learn &request, const std::string &address) const {
+
+}
+
+void
+Learner::TraceOnLearnReply(const vpaxos_rpc::LearnReply &reply) const {
+    TraceOnLearnReplyMini(reply);
+    TraceOnLearnReplyTiny(reply);
+    TraceOnLearnReplyVerbose(reply);
+}
+
+void
+Learner::TraceOnLearnReplyMini(const vpaxos_rpc::LearnReply &reply) const {
+    std::string s;
+    s.append(" mini trace learner : ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringMini(reply));
+    LOG(INFO) << s;
+}
+
+void
+Learner::TraceOnLearnReplyTiny(const vpaxos_rpc::LearnReply &reply) const {
+
+}
+
+void
+Learner::TraceOnLearnReplyVerbose(const vpaxos_rpc::LearnReply &reply) const {
+
+}
+
+
 
 } // namespace vpaxos

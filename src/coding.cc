@@ -344,7 +344,8 @@ ToStringMini(const vpaxos_rpc::PrepareReply &pb) {
     return ToJsonMini(pb).dump();
 }
 
-jsonxx::json64 ToJson(const vpaxos_rpc::Accept &pb) {
+jsonxx::json64
+ToJson(const vpaxos_rpc::Accept &pb) {
     jsonxx::json64 j, jj;
     j["ballot"] = ToJson(pb.ballot());
     j["value"] = pb.value();
@@ -355,15 +356,18 @@ jsonxx::json64 ToJson(const vpaxos_rpc::Accept &pb) {
     return jj;
 }
 
-std::string ToString(const vpaxos_rpc::Accept &pb) {
+std::string
+ToString(const vpaxos_rpc::Accept &pb) {
     return ToJson(pb).dump();
 }
 
-std::string ToStringPretty(const vpaxos_rpc::Accept &pb) {
+std::string
+ToStringPretty(const vpaxos_rpc::Accept &pb) {
     return ToJson(pb).dump(4, ' ');
 }
 
-jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Accept &pb) {
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::Accept &pb) {
     jsonxx::json64 j, jj;
     j["bal"] = ToJsonTiny(pb.ballot());
     j["value"] = pb.value();
@@ -372,11 +376,13 @@ jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Accept &pb) {
     return jj;
 }
 
-std::string ToStringTiny(const vpaxos_rpc::Accept &pb) {
+std::string
+ToStringTiny(const vpaxos_rpc::Accept &pb) {
     return ToJsonTiny(pb).dump();
 }
 
-jsonxx::json64 ToJson(const vpaxos_rpc::AcceptReply &pb) {
+jsonxx::json64
+ToJson(const vpaxos_rpc::AcceptReply &pb) {
     jsonxx::json64 j, jj;
     j["accepted"] = pb.accepted();
     j["accepted_ballot"] = ToJson(pb.accepted_ballot());
@@ -402,15 +408,18 @@ ToStringMini(const vpaxos_rpc::Accept &pb) {
     return ToJsonMini(pb).dump();
 }
 
-std::string ToString(const vpaxos_rpc::AcceptReply &pb) {
+std::string
+ToString(const vpaxos_rpc::AcceptReply &pb) {
     return ToJson(pb).dump();
 }
 
-std::string ToStringPretty(const vpaxos_rpc::AcceptReply &pb) {
+std::string
+ToStringPretty(const vpaxos_rpc::AcceptReply &pb) {
     return ToJson(pb).dump(4, ' ');
 }
 
-jsonxx::json64 ToJsonTiny(const vpaxos_rpc::AcceptReply &pb) {
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::AcceptReply &pb) {
     jsonxx::json64 j, jj;
     j["accepted"] = pb.accepted();
     j["accepted_bal"] = ToJsonTiny(pb.accepted_ballot());
@@ -420,7 +429,8 @@ jsonxx::json64 ToJsonTiny(const vpaxos_rpc::AcceptReply &pb) {
     return jj;
 }
 
-std::string ToStringTiny(const vpaxos_rpc::AcceptReply &pb) {
+std::string
+ToStringTiny(const vpaxos_rpc::AcceptReply &pb) {
     return ToJsonTiny(pb).dump();
 }
 
@@ -438,7 +448,8 @@ ToStringMini(const vpaxos_rpc::AcceptReply &pb) {
     return ToJsonMini(pb).dump();
 }
 
-jsonxx::json64 ToJson(const vpaxos_rpc::Learn &pb) {
+jsonxx::json64
+ToJson(const vpaxos_rpc::Learn &pb) {
     jsonxx::json64 j, jj;
     j["chosen_value"] = pb.chosen_value();
     j["address"] = pb.address();
@@ -446,15 +457,18 @@ jsonxx::json64 ToJson(const vpaxos_rpc::Learn &pb) {
     return jj;
 }
 
-std::string ToString(const vpaxos_rpc::Learn &pb) {
+std::string
+ToString(const vpaxos_rpc::Learn &pb) {
     return ToJson(pb).dump();
 }
 
-std::string ToStringPretty(const vpaxos_rpc::Learn &pb) {
+std::string
+ToStringPretty(const vpaxos_rpc::Learn &pb) {
     return ToJson(pb).dump(4, ' ');
 }
 
-jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Learn &pb) {
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::Learn &pb) {
     jsonxx::json64 j, jj;
     j["chosen_value"] = pb.chosen_value();
     j["address"] = pb.address();
@@ -462,11 +476,26 @@ jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Learn &pb) {
     return jj;
 }
 
-std::string ToStringTiny(const vpaxos_rpc::Learn &pb) {
+std::string
+ToStringTiny(const vpaxos_rpc::Learn &pb) {
     return ToJsonTiny(pb).dump();
 }
 
-jsonxx::json64 ToJson(const vpaxos_rpc::LearnReply &pb) {
+jsonxx::json64
+ToJsonMini(const vpaxos_rpc::Learn &pb) {
+    jsonxx::json64 j, jj;
+    j["chosen_value"] = pb.chosen_value();
+    jj["Learn"] = j;
+    return jj;
+}
+
+std::string
+ToStringMini(const vpaxos_rpc::Learn &pb) {
+    return ToJsonMini(pb).dump();
+}
+
+jsonxx::json64
+ToJson(const vpaxos_rpc::LearnReply &pb) {
     jsonxx::json64 j, jj;
     j["msg"] = pb.msg();
     j["address"] = pb.address();
@@ -474,15 +503,18 @@ jsonxx::json64 ToJson(const vpaxos_rpc::LearnReply &pb) {
     return jj;
 }
 
-std::string ToString(const vpaxos_rpc::LearnReply &pb) {
+std::string
+ToString(const vpaxos_rpc::LearnReply &pb) {
     return ToJson(pb).dump();
 }
 
-std::string ToStringPretty(const vpaxos_rpc::LearnReply &pb) {
+std::string
+ToStringPretty(const vpaxos_rpc::LearnReply &pb) {
     return ToJson(pb).dump(4, ' ');
 }
 
-jsonxx::json64 ToJsonTiny(const vpaxos_rpc::LearnReply &pb) {
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::LearnReply &pb) {
     jsonxx::json64 j, jj;
     j["msg"] = pb.msg();
     j["address"] = pb.address();
@@ -490,10 +522,22 @@ jsonxx::json64 ToJsonTiny(const vpaxos_rpc::LearnReply &pb) {
     return jj;
 }
 
-std::string ToStringTiny(const vpaxos_rpc::LearnReply &pb) {
+std::string
+ToStringTiny(const vpaxos_rpc::LearnReply &pb) {
     return ToJsonTiny(pb).dump();
 }
 
+jsonxx::json64
+ToJsonMini(const vpaxos_rpc::LearnReply &pb) {
+    jsonxx::json64 j, jj;
+    j["msg"] = pb.msg();
+    jj["LearnReply"] = j;
+    return jj;
+}
 
+std::string
+ToStringMini(const vpaxos_rpc::LearnReply &pb) {
+    return ToJsonMini(pb).dump();
+}
 
 } // namespace vpaxos

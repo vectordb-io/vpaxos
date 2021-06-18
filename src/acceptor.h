@@ -14,12 +14,12 @@ class Acceptor {
     ~Acceptor() = default;
     Acceptor(const Acceptor&) = delete;
     Acceptor& operator=(const Acceptor&) = delete;
-
     Status Init();
 
     void OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply &reply);
     void OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &reply);
 
+  private:
     Status PromisedBallot(Ballot &ballot) const;
     Status PersistPromisedBallot(const Ballot &ballot);
 
@@ -30,13 +30,13 @@ class Acceptor {
     Status AcceptedValue(std::string &accepted_value) const;
     Status PersistAcceptedValue(const std::string &accepted_value);
 
+  private: // for debug
     jsonxx::json64 ToJson() const;
     std::string ToString() const;
     std::string ToStringPretty() const;
     jsonxx::json64 ToJsonTiny() const;
     std::string ToStringTiny() const;
 
-  private: // for debug
     void TraceOnPrepare(const vpaxos_rpc::Prepare &request) const;
     void TraceOnPrepareMini(const vpaxos_rpc::Prepare &request) const;
     void TraceOnPrepareTiny(const vpaxos_rpc::Prepare &request) const;

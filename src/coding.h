@@ -87,12 +87,19 @@ std::string ToString(const vpaxos_rpc::Learn &pb);
 std::string ToStringPretty(const vpaxos_rpc::Learn &pb);
 jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Learn &pb);
 std::string ToStringTiny(const vpaxos_rpc::Learn &pb);
+jsonxx::json64 ToJsonMini(const vpaxos_rpc::Learn &pb);
+std::string ToStringMini(const vpaxos_rpc::Learn &pb);
 
 jsonxx::json64 ToJson(const vpaxos_rpc::LearnReply &pb);
 std::string ToString(const vpaxos_rpc::LearnReply &pb);
 std::string ToStringPretty(const vpaxos_rpc::LearnReply &pb);
 jsonxx::json64 ToJsonTiny(const vpaxos_rpc::LearnReply &pb);
 std::string ToStringTiny(const vpaxos_rpc::LearnReply &pb);
+jsonxx::json64 ToJsonMini(const vpaxos_rpc::LearnReply &pb);
+std::string ToStringMini(const vpaxos_rpc::LearnReply &pb);
+
+
+
 
 } // namespace vpaxos
 

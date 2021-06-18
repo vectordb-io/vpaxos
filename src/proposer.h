@@ -34,15 +34,13 @@ class PrepareManager {
     jsonxx::json64 ToJsonTiny() const;
     std::string ToStringTiny() const;
 
-
   private:
-    std::map<std::string, vpaxos_rpc::PrepareReply> votes_;
-
     bool accept_;
     int quorum_;
     Ballot promised_ballot_;
     Ballot max_accepted_ballot_; // maybe null
     std::string accepted_value_; // max_accepted_ballot_ is not null
+    std::map<std::string, vpaxos_rpc::PrepareReply> votes_;
 };
 
 
@@ -68,12 +66,11 @@ class AcceptManager {
     std::string ToStringTiny() const;
 
   private:
-    std::map<std::string, vpaxos_rpc::AcceptReply> votes_;
-
     bool learn_;
     int quorum_;
     Ballot accepted_ballot_;
     std::string accepted_value_;
+    std::map<std::string, vpaxos_rpc::AcceptReply> votes_;
 };
 
 
@@ -83,11 +80,7 @@ class Proposer {
     ~Proposer() = default;
     Proposer(const Proposer&) = delete;
     Proposer& operator=(const Proposer&) = delete;
-
     Status Init();
-    Status Propose(std::string value, void *flag);
-    Status PrepareAll(void *flag);
-    Status AcceptAll(void *flag);
 
     void OnPropose(const vpaxos_rpc::Propose &request, void *async_flag);
     Status Prepare(const vpaxos_rpc::Prepare &request, const std::string &address);
@@ -95,27 +88,30 @@ class Proposer {
     Status Accept(const vpaxos_rpc::Accept &request, const std::string &address);
     Status OnAcceptReply(const vpaxos_rpc::AcceptReply &reply);
 
-    jsonxx::json64 ToJson() const;
-    std::string ToString() const;
-    std::string ToStringPretty() const;
-    jsonxx::json64 ToJsonTiny() const;
-    std::string ToStringTiny() const;
-
   private:
     Status MaxBallot(Ballot &ballot) const;
     Status PersistMaxBallot(const Ballot &ballot);
+
     void NextBallot();
     void NextBallot(Ballot b);
+    Status Propose(std::string value, void *flag);
+    Status PrepareAll(void *flag);
+    Status AcceptAll(void *flag);
 
-
+  private:
     Ballot current_ballot_;
     std::string propose_value_;
     bool proposing_;
     PrepareManager prepare_manager_;
     AcceptManager accept_manager_;
 
-
   private: // for debug
+    jsonxx::json64 ToJson() const;
+    std::string ToString() const;
+    std::string ToStringPretty() const;
+    jsonxx::json64 ToJsonTiny() const;
+    std::string ToStringTiny() const;
+
     void TraceOnPropose(const vpaxos_rpc::Propose &request) const;
     void TraceOnProposeMini(const vpaxos_rpc::Propose &request) const;
     void TraceOnProposeTiny(const vpaxos_rpc::Propose &request) const;
@@ -145,7 +141,6 @@ class Proposer {
     void TraceChosenMini(const std::string &value) const;
     void TraceChosenTiny(const std::string &value) const;
     void TraceChosenVerbose(const std::string &value) const;
-
 };
 
 } // namespace vpaxos
