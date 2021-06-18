@@ -107,22 +107,45 @@ class Proposer {
     void NextBallot();
     void NextBallot(Ballot b);
 
-    void TraceOnPropose(const vpaxos_rpc::Propose &request) const;
-    void TraceOnProposeTiny(const vpaxos_rpc::Propose &reques) const;
-    void TracePrepare(const vpaxos_rpc::Prepare &request, const std::string &address) const;
-    void TracePrepareTiny(const vpaxos_rpc::Prepare &request, const std::string &address) const;
-    void TraceOnPrepareReply(const vpaxos_rpc::PrepareReply &reply) const;
-    void TraceOnPrepareReplyTiny(const vpaxos_rpc::PrepareReply &reply) const;
-    void TraceAccept(const vpaxos_rpc::Accept &request, const std::string &address) const;
-    void TraceAcceptTiny(const vpaxos_rpc::Accept &request, const std::string &address) const;
-    void TraceOnAcceptReply(const vpaxos_rpc::AcceptReply &reply) const;
-    void TraceOnAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply) const;
 
     Ballot current_ballot_;
     std::string propose_value_;
     bool proposing_;
     PrepareManager prepare_manager_;
     AcceptManager accept_manager_;
+
+
+  private: // for debug
+    void TraceOnPropose(const vpaxos_rpc::Propose &request) const;
+    void TraceOnProposeMini(const vpaxos_rpc::Propose &request) const;
+    void TraceOnProposeTiny(const vpaxos_rpc::Propose &request) const;
+    void TraceOnProposeVerbose(const vpaxos_rpc::Propose &request) const;
+
+    void TracePrepare(const vpaxos_rpc::Prepare &request, const std::string &address) const;
+    void TracePrepareMini(const vpaxos_rpc::Prepare &request, const std::string &address) const;
+    void TracePrepareTiny(const vpaxos_rpc::Prepare &request, const std::string &address) const;
+    void TracePrepareVerbose(const vpaxos_rpc::Prepare &request, const std::string &address) const;
+
+    void TraceOnPrepareReply(const vpaxos_rpc::PrepareReply &reply) const;
+    void TraceOnPrepareReplyMini(const vpaxos_rpc::PrepareReply &reply) const;
+    void TraceOnPrepareReplyTiny(const vpaxos_rpc::PrepareReply &reply) const;
+    void TraceOnPrepareReplyVerbose(const vpaxos_rpc::PrepareReply &reply) const;
+
+    void TraceAccept(const vpaxos_rpc::Accept &request, const std::string &address) const;
+    void TraceAcceptMini(const vpaxos_rpc::Accept &request, const std::string &address) const;
+    void TraceAcceptTiny(const vpaxos_rpc::Accept &request, const std::string &address) const;
+    void TraceAcceptVerbose(const vpaxos_rpc::Accept &request, const std::string &address) const;
+
+    void TraceOnAcceptReply(const vpaxos_rpc::AcceptReply &reply) const;
+    void TraceOnAcceptReplyMini(const vpaxos_rpc::AcceptReply &reply) const;
+    void TraceOnAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply) const;
+    void TraceOnAcceptReplyVerbose(const vpaxos_rpc::AcceptReply &reply) const;
+
+    void TraceChosen(const std::string &value) const;
+    void TraceChosenMini(const std::string &value) const;
+    void TraceChosenTiny(const std::string &value) const;
+    void TraceChosenVerbose(const std::string &value) const;
+
 };
 
 } // namespace vpaxos

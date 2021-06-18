@@ -78,6 +78,16 @@ class NodeId {
         return ToJsonTiny().dump();
     }
 
+    jsonxx::json64 ToJsonMini() const {
+        jsonxx::json64 j;
+        j[0] = address_;
+        return j;
+    }
+
+    std::string ToStringMini() const {
+        return ToJsonTiny().dump();
+    }
+
   private:
     void Address2Node(const std::string& address, std::string &host, uint32_t &port) {
         char* psave = nullptr;

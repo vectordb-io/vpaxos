@@ -39,7 +39,6 @@ Acceptor::Init() {
 void
 Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply &reply) {
     //Node::GetInstance().Sleep(100, 200);
-    TraceOnPrepareTiny(request);
     TraceOnPrepare(request);
 
     Status s;
@@ -98,14 +97,12 @@ Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply
     reply.set_async_flag(request.async_flag());
 
 
-    TracePrepareReplyTiny(reply, request.address());
     TracePrepareReply(reply, request.address());
 }
 
 void
 Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &reply) {
     //Node::GetInstance().Sleep(100, 200);
-    TraceOnAcceptTiny(request);
     TraceOnAccept(request);
 
     Status s;
@@ -150,7 +147,6 @@ Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &r
     reply.set_address(Config::GetInstance().MyAddress()->ToString());
     reply.set_async_flag(request.async_flag());
 
-    TraceAcceptReplyTiny(reply, request.address());
     TraceAcceptReply(reply, request.address());
 }
 
@@ -196,15 +192,21 @@ Acceptor::HasAcceptedValue() const {
     return s;
 }
 
+//-------------------------------------------------------------------------------------------
+// for debug
+
 void
 Acceptor::TraceOnPrepare(const vpaxos_rpc::Prepare &request) const {
+    TraceOnPrepareMini(request);
+    TraceOnPrepareTiny(request);
+    TraceOnPrepareVerbose(request);
+}
+
+void
+Acceptor::TraceOnPrepareMini(const vpaxos_rpc::Prepare &request) const {
     std::string s;
-    std::string state = ToStringPretty();
-    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
-    s.append("verbose trace proposer:\n\n");
-    s.append(state).append("\n\n");
-    s.append("recv from : ").append(request.address()).append(":\n");
-    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    s.append("mini trace acceptor: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-").append(request.address()).append("-").append(::vpaxos::ToStringMini(request));
     LOG(INFO) << s;
 }
 
@@ -219,16 +221,29 @@ Acceptor::TraceOnPrepareTiny(const vpaxos_rpc::Prepare &request) const {
 }
 
 void
-Acceptor::TracePrepareReply(const vpaxos_rpc::PrepareReply &reply, const std::string &address) const {
+Acceptor::TraceOnPrepareVerbose(const vpaxos_rpc::Prepare &request) const {
     std::string s;
     std::string state = ToStringPretty();
-
     s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
     s.append("verbose trace proposer:\n\n");
-
     s.append(state).append("\n\n");
-    s.append("send to : ").append(address).append(":\n");
-    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    s.append("recv from : ").append(request.address()).append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
+Acceptor::TracePrepareReply(const vpaxos_rpc::PrepareReply &reply, const std::string &address) const {
+    TracePrepareReplyMini(reply, address);
+    TracePrepareReplyTiny(reply, address);
+    TracePrepareReplyVerbose(reply, address);
+}
+
+void
+Acceptor::TracePrepareReplyMini(const vpaxos_rpc::PrepareReply &reply, const std::string &address) const {
+    std::string s;
+    s.append("mini trace acceptor: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    Send To -").append(address).append("-").append(::vpaxos::ToStringMini(reply));
     LOG(INFO) << s;
 }
 
@@ -243,7 +258,7 @@ Acceptor::TracePrepareReplyTiny(const vpaxos_rpc::PrepareReply &reply, const std
 }
 
 void
-Acceptor::TraceOnAccept(const vpaxos_rpc::Accept &request) const {
+Acceptor::TracePrepareReplyVerbose(const vpaxos_rpc::PrepareReply &reply, const std::string &address) const {
     std::string s;
     std::string state = ToStringPretty();
 
@@ -251,8 +266,23 @@ Acceptor::TraceOnAccept(const vpaxos_rpc::Accept &request) const {
     s.append("verbose trace proposer:\n\n");
 
     s.append(state).append("\n\n");
-    s.append("recv from : ").append(request.address()).append(":\n");
-    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    s.append("send to : ").append(address).append(":\n");
+    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
+Acceptor::TraceOnAccept(const vpaxos_rpc::Accept &request) const {
+    TraceOnAcceptMini(request);
+    TraceOnAcceptTiny(request);
+    TraceOnAcceptVerbose(request);
+}
+
+void
+Acceptor::TraceOnAcceptMini(const vpaxos_rpc::Accept &request) const {
+    std::string s;
+    s.append("mini trace acceptor: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-").append(request.address()).append("-").append(::vpaxos::ToStringMini(request));
     LOG(INFO) << s;
 }
 
@@ -267,7 +297,7 @@ Acceptor::TraceOnAcceptTiny(const vpaxos_rpc::Accept &request) const {
 }
 
 void
-Acceptor::TraceAcceptReply(const vpaxos_rpc::AcceptReply &reply, const std::string &address) const {
+Acceptor::TraceOnAcceptVerbose(const vpaxos_rpc::Accept &request) const {
     std::string s;
     std::string state = ToStringPretty();
 
@@ -275,8 +305,23 @@ Acceptor::TraceAcceptReply(const vpaxos_rpc::AcceptReply &reply, const std::stri
     s.append("verbose trace proposer:\n\n");
 
     s.append(state).append("\n\n");
-    s.append("send to : ").append(address).append(":\n");
-    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    s.append("recv from : ").append(request.address()).append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
+Acceptor::TraceAcceptReply(const vpaxos_rpc::AcceptReply &reply, const std::string &address) const {
+    TraceAcceptReplyMini(reply, address);
+    TraceAcceptReplyTiny(reply, address);
+    TraceAcceptReplyVerbose(reply, address);
+}
+
+void
+Acceptor::TraceAcceptReplyMini(const vpaxos_rpc::AcceptReply &reply, const std::string &address) const {
+    std::string s;
+    s.append("mini trace acceptor: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    Send To -").append(address).append("-").append(::vpaxos::ToStringMini(reply));
     LOG(INFO) << s;
 }
 
@@ -289,6 +334,22 @@ Acceptor::TraceAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply, const std::
     s.append("    SendTo-").append(address).append("-").append(::vpaxos::ToStringTiny(reply));
     LOG(INFO) << s;
 }
+
+void
+Acceptor::TraceAcceptReplyVerbose(const vpaxos_rpc::AcceptReply &reply, const std::string &address) const {
+    std::string s;
+    std::string state = ToStringPretty();
+
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+
+    s.append(state).append("\n\n");
+    s.append("send to : ").append(address).append(":\n");
+    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+//------------------------------------------------------------------------------------------------------------------
 
 jsonxx::json64
 Acceptor::ToJson() const {
@@ -354,9 +415,5 @@ std::string
 Acceptor::ToStringTiny() const {
     return ToJsonTiny().dump();
 }
-
-
-
-
 
 } // namespace vpaxos

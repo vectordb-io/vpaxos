@@ -369,7 +369,6 @@ Proposer::AcceptAll(void *flag) {
 
 void
 Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
-    TraceOnProposeTiny(request);
     TraceOnPropose(request);
     if (proposing_) {
         vpaxos_rpc::ProposeReply reply;
@@ -386,9 +385,7 @@ Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
 
 Status
 Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address) {
-    TracePrepareTiny(request, address);
     TracePrepare(request, address);
-
     auto s = Env::GetInstance().AsyncPrepare(
                  request,
                  address,
@@ -399,9 +396,7 @@ Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address
 
 Status
 Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
-    TraceOnPrepareReplyTiny(reply);
     TraceOnPrepareReply(reply);
-
     Status s;
     Ballot receive_ballot;
     Pb2Ballot(reply.promised_ballot(), receive_ballot);
@@ -448,9 +443,7 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
 Status
 Proposer::Accept(const vpaxos_rpc::Accept &request, const std::string &address) {
     //Node::GetInstance().Sleep(100, 200);
-    TraceAcceptTiny(request, address);
     TraceAccept(request, address);
-
     auto s = Env::GetInstance().AsyncAccept(
                  request,
                  address,
@@ -461,9 +454,7 @@ Proposer::Accept(const vpaxos_rpc::Accept &request, const std::string &address) 
 
 Status
 Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
-    TraceOnAcceptReplyTiny(reply);
     TraceOnAcceptReply(reply);
-
     Status s;
     Ballot receive_ballot;
     Pb2Ballot(reply.accepted_ballot(), receive_ballot);
@@ -486,11 +477,14 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
         accept_manager_.Vote(reply);
         if (accept_manager_.Majority()) {
             std::string log_str;
-            log_str.append("tiny trace proposer value chosen:[").append(accept_manager_.AcceptedValue())
+            log_str.append("value chosen:[").append(accept_manager_.AcceptedValue())
             .append("] current_ballot_:[").append(current_ballot_.ToString()).append("]\n\n")
             .append("prepare_manager_:").append(prepare_manager_.ToString()).append("\n")
             .append("accept_manager_:").append(accept_manager_.ToString()).append("\n");
             LOG(INFO) << log_str;
+
+            TraceChosen(accept_manager_.AcceptedValue());
+
 
             // reply to client
             vpaxos_rpc::ProposeReply propose_reply;
@@ -545,15 +539,21 @@ Proposer::PersistMaxBallot(const Ballot &ballot) {
     return s;
 }
 
+//---------------------------------------------------------------------------------------------------
+// for debug
+
 void
 Proposer::TraceOnPropose(const vpaxos_rpc::Propose &request) const {
+    TraceOnProposeMini(request);
+    TraceOnProposeTiny(request);
+    TraceOnProposeVerbose(request);
+}
+
+void
+Proposer::TraceOnProposeMini(const vpaxos_rpc::Propose &request) const {
     std::string s;
-    std::string state = ToStringPretty();
-    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
-    s.append("verbose trace proposer:\n\n");
-    s.append(state).append("\n\n");
-    s.append("receive from : x.x.x.x").append(":\n");
-    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    s.append("mini trace proposer: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-x.x.x.x-").append(::vpaxos::ToStringMini(request));
     LOG(INFO) << s;
 }
 
@@ -568,14 +568,29 @@ Proposer::TraceOnProposeTiny(const vpaxos_rpc::Propose &request) const {
 }
 
 void
-Proposer::TracePrepare(const vpaxos_rpc::Prepare &request, const std::string &address) const {
+Proposer::TraceOnProposeVerbose(const vpaxos_rpc::Propose &request) const {
     std::string s;
     std::string state = ToStringPretty();
     s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
     s.append("verbose trace proposer:\n\n");
     s.append(state).append("\n\n");
-    s.append("send to : ").append(address).append(":\n");
+    s.append("receive from : x.x.x.x").append(":\n");
     s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TracePrepare(const vpaxos_rpc::Prepare &request, const std::string &address) const {
+    TracePrepareMini(request, address);
+    TracePrepareTiny(request, address);
+    TracePrepareVerbose(request, address);
+}
+
+void
+Proposer::TracePrepareMini(const vpaxos_rpc::Prepare &request, const std::string &address) const {
+    std::string s;
+    s.append("mini trace proposer: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    Send To -").append(address).append("-").append(::vpaxos::ToStringMini(request));
     LOG(INFO) << s;
 }
 
@@ -590,14 +605,29 @@ Proposer::TracePrepareTiny(const vpaxos_rpc::Prepare &request, const std::string
 }
 
 void
-Proposer::TraceOnPrepareReply(const vpaxos_rpc::PrepareReply &reply) const {
+Proposer::TracePrepareVerbose(const vpaxos_rpc::Prepare &request, const std::string &address) const {
     std::string s;
     std::string state = ToStringPretty();
     s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
     s.append("verbose trace proposer:\n\n");
     s.append(state).append("\n\n");
-    s.append("recv from : ").append(reply.address()).append(":\n");
-    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    s.append("send to : ").append(address).append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TraceOnPrepareReply(const vpaxos_rpc::PrepareReply &reply) const {
+    TraceOnPrepareReplyMini(reply);
+    TraceOnPrepareReplyTiny(reply);
+    TraceOnPrepareReplyVerbose(reply);
+}
+
+void
+Proposer::TraceOnPrepareReplyMini(const vpaxos_rpc::PrepareReply &reply) const {
+    std::string s;
+    s.append("mini trace proposer: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringMini(reply));
     LOG(INFO) << s;
 }
 
@@ -612,14 +642,29 @@ Proposer::TraceOnPrepareReplyTiny(const vpaxos_rpc::PrepareReply &reply) const {
 }
 
 void
-Proposer::TraceAccept(const vpaxos_rpc::Accept &request, const std::string &address) const {
+Proposer::TraceOnPrepareReplyVerbose(const vpaxos_rpc::PrepareReply &reply) const {
     std::string s;
     std::string state = ToStringPretty();
     s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
     s.append("verbose trace proposer:\n\n");
     s.append(state).append("\n\n");
-    s.append("send to : ").append(address).append(":\n");
-    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    s.append("recv from : ").append(reply.address()).append(":\n");
+    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TraceAccept(const vpaxos_rpc::Accept &request, const std::string &address) const {
+    TraceAcceptMini(request, address);
+    TraceAcceptTiny(request, address);
+    TraceAcceptVerbose(request, address);
+}
+
+void
+Proposer::TraceAcceptMini(const vpaxos_rpc::Accept &request, const std::string &address) const {
+    std::string s;
+    s.append("mini trace proposer: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    Send To -").append(address).append("-").append(::vpaxos::ToStringMini(request));
     LOG(INFO) << s;
 }
 
@@ -634,7 +679,44 @@ Proposer::TraceAcceptTiny(const vpaxos_rpc::Accept &request, const std::string &
 }
 
 void
+Proposer::TraceAcceptVerbose(const vpaxos_rpc::Accept &request, const std::string &address) const {
+    std::string s;
+    std::string state = ToStringPretty();
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+    s.append(state).append("\n\n");
+    s.append("send to : ").append(address).append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
+
+void
 Proposer::TraceOnAcceptReply(const vpaxos_rpc::AcceptReply &reply) const {
+    TraceOnAcceptReplyMini(reply);
+    TraceOnAcceptReplyTiny(reply);
+    TraceOnAcceptReplyVerbose(reply);
+}
+
+void
+Proposer::TraceOnAcceptReplyMini(const vpaxos_rpc::AcceptReply &reply) const {
+    std::string s;
+    s.append("mini trace proposer: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringMini(reply));
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TraceOnAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringTiny(reply));
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TraceOnAcceptReplyVerbose(const vpaxos_rpc::AcceptReply &reply) const {
     std::string s;
     std::string state = ToStringPretty();
     s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
@@ -646,12 +728,37 @@ Proposer::TraceOnAcceptReply(const vpaxos_rpc::AcceptReply &reply) const {
 }
 
 void
-Proposer::TraceOnAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply) const {
+Proposer::TraceChosen(const std::string &value) const {
+    TraceChosenMini(value);
+    TraceChosenTiny(value);
+    TraceChosenVerbose(value);
+}
+
+void
+Proposer::TraceChosenMini(const std::string &value) const {
+    std::string s;
+    s.append("mini trace proposer: ").append(Node::GetInstance().id().ToStringMini());
+    s.append("    ValueChosen:").append(value);
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TraceChosenTiny(const std::string &value) const {
     std::string s;
     std::string state = "State-" + ToStringTiny();
     s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
     s.append("    ").append(state);
-    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringTiny(reply));
+    s.append("    ValueChosen:").append(value);
+    LOG(INFO) << s;
+}
+
+void
+Proposer::TraceChosenVerbose(const std::string &value) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("verbose trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    ValueChosen:").append(value);
     LOG(INFO) << s;
 }
 
