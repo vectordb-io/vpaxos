@@ -121,7 +121,7 @@ ToStringPretty(const vpaxos_rpc::Propose &pb) {
 jsonxx::json64
 ToJsonTiny(const vpaxos_rpc::Propose &pb) {
     jsonxx::json64 j, jj;
-    j[0] = pb.value();
+    j["value"] = pb.value();
     jj["Propose"] = j;
     return jj;
 }
@@ -162,6 +162,240 @@ ToJsonTiny(const vpaxos_rpc::ProposeReply &pb) {
 
 std::string
 ToStringTiny(const vpaxos_rpc::ProposeReply &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64
+ToJson(const vpaxos_rpc::Ballot &pb) {
+    jsonxx::json64 j, jj;
+    j["proposal_id"] = pb.proposal_id();
+    j["node_id"] = pb.node_id();
+    jj["Ballot"] = j;
+    return jj;
+}
+
+std::string
+ToString(const vpaxos_rpc::Ballot &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string
+ToStringPretty(const vpaxos_rpc::Ballot &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::Ballot &pb) {
+    jsonxx::json64 j, jj;
+    j["proposal"] = pb.proposal_id();
+    NodeId n(pb.node_id());
+    j["node"] = n.ToJsonTiny();
+    jj["Ballot"] = j;
+    return jj;
+}
+
+std::string
+ToStringTiny(const vpaxos_rpc::Ballot &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64
+ToJson(const vpaxos_rpc::Prepare &pb) {
+    jsonxx::json64 j, jj;
+    j["ballot"] = ToJson(pb.ballot());
+    j["trace_ballot"] = ToJson(pb.trace_ballot());
+    j["address"] = pb.address();
+    j["async_flag"] = pb.async_flag();
+    jj["Prepare"] = j;
+    return jj;
+}
+
+std::string
+ToString(const vpaxos_rpc::Prepare &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string
+ToStringPretty(const vpaxos_rpc::Prepare &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::Prepare &pb) {
+    jsonxx::json64 j, jj;
+    j["bal"] = ToJsonTiny(pb.ballot());
+    j["trace_bal"] = ToJsonTiny(pb.trace_ballot());
+    jj["Prepare"] = j;
+    return jj;
+}
+
+std::string
+ToStringTiny(const vpaxos_rpc::Prepare &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64
+ToJson(const vpaxos_rpc::PrepareReply &pb) {
+    jsonxx::json64 j, jj;
+    j["prepared"] = pb.prepared();
+    j["promised_ballot"] = ToJson(pb.promised_ballot());
+    j["ever_accepted"] = pb.ever_accepted();
+    j["accepted_ballot"] = ToJson(pb.accepted_ballot());
+    j["accepted_value"] = pb.accepted_value();
+    j["trace_ballot"] = ToJson(pb.trace_ballot());
+    j["address"] = pb.address();
+    j["async_flag"] = pb.async_flag();
+    jj["PrepareReply"] = j;
+    return jj;
+}
+
+std::string
+ToString(const vpaxos_rpc::PrepareReply &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string
+ToStringPretty(const vpaxos_rpc::PrepareReply &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64
+ToJsonTiny(const vpaxos_rpc::PrepareReply &pb) {
+    jsonxx::json64 j, jj;
+    j["prepared"] = pb.prepared();
+    j["promised_bal"] = ToJsonTiny(pb.promised_ballot());
+    j["ever_accepted"] = pb.ever_accepted();
+    j["accepted_bal"] = ToJsonTiny(pb.accepted_ballot());
+    j["accepted_value"] = pb.accepted_value();
+    j["trace_bal"] = ToJsonTiny(pb.trace_ballot());
+    jj["PrepareReply"] = j;
+    return jj;
+}
+
+std::string
+ToStringTiny(const vpaxos_rpc::PrepareReply &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64 ToJson(const vpaxos_rpc::Accept &pb) {
+    jsonxx::json64 j, jj;
+    j["ballot"] = ToJson(pb.ballot());
+    j["value"] = pb.value();
+    j["trace_ballot"] = ToJson(pb.trace_ballot());
+    j["address"] = pb.address();
+    j["async_flag"] = pb.async_flag();
+    jj["Accept"] = j;
+    return jj;
+}
+
+std::string ToString(const vpaxos_rpc::Accept &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string ToStringPretty(const vpaxos_rpc::Accept &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Accept &pb) {
+    jsonxx::json64 j, jj;
+    j["bal"] = ToJsonTiny(pb.ballot());
+    j["value"] = pb.value();
+    j["trace_bal"] = ToJsonTiny(pb.trace_ballot());
+    jj["Accept"] = j;
+    return jj;
+}
+
+std::string ToStringTiny(const vpaxos_rpc::Accept &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64 ToJson(const vpaxos_rpc::AcceptReply &pb) {
+    jsonxx::json64 j, jj;
+    j["accepted"] = pb.accepted();
+    j["accepted_ballot"] = ToJson(pb.accepted_ballot());
+    j["accepted_value"] = pb.accepted_value();
+    j["trace_ballot"] = ToJson(pb.trace_ballot());
+    j["address"] = pb.address();
+    j["async_flag"] = pb.async_flag();
+    jj["AcceptReply"] = j;
+    return jj;
+}
+
+std::string ToString(const vpaxos_rpc::AcceptReply &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string ToStringPretty(const vpaxos_rpc::AcceptReply &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::AcceptReply &pb) {
+    jsonxx::json64 j, jj;
+    j["accepted"] = pb.accepted();
+    j["accepted_bal"] = ToJsonTiny(pb.accepted_ballot());
+    j["accepted_value"] = pb.accepted_value();
+    j["trace_bal"] = ToJsonTiny(pb.trace_ballot());
+    jj["AcceptReply"] = j;
+    return jj;
+}
+
+std::string ToStringTiny(const vpaxos_rpc::AcceptReply &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64 ToJson(const vpaxos_rpc::Learn &pb) {
+    jsonxx::json64 j, jj;
+    j["chosen_value"] = pb.chosen_value();
+    j["address"] = pb.address();
+    jj["Learn"] = j;
+    return jj;
+}
+
+std::string ToString(const vpaxos_rpc::Learn &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string ToStringPretty(const vpaxos_rpc::Learn &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Learn &pb) {
+    jsonxx::json64 j, jj;
+    j["chosen_value"] = pb.chosen_value();
+    j["address"] = pb.address();
+    jj["Learn"] = j;
+    return jj;
+}
+
+std::string ToStringTiny(const vpaxos_rpc::Learn &pb) {
+    return ToJsonTiny(pb).dump();
+}
+
+jsonxx::json64 ToJson(const vpaxos_rpc::LearnReply &pb) {
+    jsonxx::json64 j, jj;
+    j["msg"] = pb.msg();
+    j["address"] = pb.address();
+    jj["LearnReply"] = j;
+    return jj;
+}
+
+std::string ToString(const vpaxos_rpc::LearnReply &pb) {
+    return ToJson(pb).dump();
+}
+
+std::string ToStringPretty(const vpaxos_rpc::LearnReply &pb) {
+    return ToJson(pb).dump(4, ' ');
+}
+
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::LearnReply &pb) {
+    jsonxx::json64 j, jj;
+    j["msg"] = pb.msg();
+    j["address"] = pb.address();
+    jj["LearnReply"] = j;
+    return jj;
+}
+
+std::string ToStringTiny(const vpaxos_rpc::LearnReply &pb) {
     return ToJsonTiny(pb).dump();
 }
 

@@ -32,12 +32,12 @@ AsyncTaskOnPropose::Process() {
     if (done_) {
         // optimizing by memory pool
 
-        LOG(INFO) << "debug AsyncTaskOnPropose::Process delete call" << this;
+//        LOG(INFO) << "debug AsyncTaskOnPropose::Process delete call" << this;
 
         delete this;
     } else {
 
-        LOG(INFO) << "debug AsyncTaskOnPropose::Process enqueue call" << this;
+//        LOG(INFO) << "debug AsyncTaskOnPropose::Process enqueue call" << this;
 
         Env::GetInstance().thread_pool()->ProduceOne(std::bind(&GrpcServer::OnPropose, Env::GetInstance().grpc_server(), this));
         Env::GetInstance().grpc_server()->IntendOnPropose();

@@ -70,7 +70,7 @@ class NodeId {
 
     jsonxx::json64 ToJsonTiny() const {
         jsonxx::json64 j;
-        j["addr"] = address_;
+        j[0] = address_;
         return j;
     }
 

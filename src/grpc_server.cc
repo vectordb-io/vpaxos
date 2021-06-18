@@ -20,11 +20,11 @@ GrpcServer::~GrpcServer() {
 Status
 GrpcServer::AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call) {
 
-    LOG(INFO) << "debug " << "call: " << call;
+//    LOG(INFO) << "debug " << "call: " << call;
 
     if (async_req_manager_.Has(call)) {
 
-        LOG(INFO) << "debug " << "has call: " << call;
+//        LOG(INFO) << "debug " << "has call: " << call;
 
         AsyncTaskOnPropose *p = static_cast<AsyncTaskOnPropose*>(call);
         p->done_ = true;
@@ -34,7 +34,7 @@ GrpcServer::AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call)
         p->responder_.Finish(p->reply_, grpc::Status::OK, p);
         async_req_manager_.Delete(p);
     } else {
-        LOG(INFO) << "debug " << "has not call: " << call;
+//        LOG(INFO) << "debug " << "has not call: " << call;
     }
 
     return Status::OK();

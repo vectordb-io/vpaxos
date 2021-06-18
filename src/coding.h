@@ -38,6 +38,47 @@ std::string ToStringPretty(const vpaxos_rpc::ProposeReply &pb);
 jsonxx::json64 ToJsonTiny(const vpaxos_rpc::ProposeReply &pb);
 std::string ToStringTiny(const vpaxos_rpc::ProposeReply &pb);
 
+jsonxx::json64 ToJson(const vpaxos_rpc::Ballot &pb);
+std::string ToString(const vpaxos_rpc::Ballot &pb);
+std::string ToStringPretty(const vpaxos_rpc::Ballot &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Ballot &pb);
+std::string ToStringTiny(const vpaxos_rpc::Ballot &pb);
+
+jsonxx::json64 ToJson(const vpaxos_rpc::Prepare &pb);
+std::string ToString(const vpaxos_rpc::Prepare &pb);
+std::string ToStringPretty(const vpaxos_rpc::Prepare &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Prepare &pb);
+std::string ToStringTiny(const vpaxos_rpc::Prepare &pb);
+
+jsonxx::json64 ToJson(const vpaxos_rpc::PrepareReply &pb);
+std::string ToString(const vpaxos_rpc::PrepareReply &pb);
+std::string ToStringPretty(const vpaxos_rpc::PrepareReply &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::PrepareReply &pb);
+std::string ToStringTiny(const vpaxos_rpc::PrepareReply &pb);
+
+jsonxx::json64 ToJson(const vpaxos_rpc::Accept &pb);
+std::string ToString(const vpaxos_rpc::Accept &pb);
+std::string ToStringPretty(const vpaxos_rpc::Accept &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Accept &pb);
+std::string ToStringTiny(const vpaxos_rpc::Accept &pb);
+
+jsonxx::json64 ToJson(const vpaxos_rpc::AcceptReply &pb);
+std::string ToString(const vpaxos_rpc::AcceptReply &pb);
+std::string ToStringPretty(const vpaxos_rpc::AcceptReply &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::AcceptReply &pb);
+std::string ToStringTiny(const vpaxos_rpc::AcceptReply &pb);
+
+jsonxx::json64 ToJson(const vpaxos_rpc::Learn &pb);
+std::string ToString(const vpaxos_rpc::Learn &pb);
+std::string ToStringPretty(const vpaxos_rpc::Learn &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::Learn &pb);
+std::string ToStringTiny(const vpaxos_rpc::Learn &pb);
+
+jsonxx::json64 ToJson(const vpaxos_rpc::LearnReply &pb);
+std::string ToString(const vpaxos_rpc::LearnReply &pb);
+std::string ToStringPretty(const vpaxos_rpc::LearnReply &pb);
+jsonxx::json64 ToJsonTiny(const vpaxos_rpc::LearnReply &pb);
+std::string ToStringTiny(const vpaxos_rpc::LearnReply &pb);
 
 } // namespace vpaxos
 

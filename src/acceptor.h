@@ -30,10 +30,21 @@ class Acceptor {
     Status AcceptedValue(std::string &accepted_value) const;
     Status PersistAcceptedValue(const std::string &accepted_value);
 
-    void DebugLog(bool is_send, std::string header, std::string address, const google::protobuf::Message *m);
+    jsonxx::json64 ToJson() const;
+    std::string ToString() const;
+    std::string ToStringPretty() const;
+    jsonxx::json64 ToJsonTiny() const;
+    std::string ToStringTiny() const;
 
   private:
-
+    void TraceOnPrepare(const vpaxos_rpc::Prepare &request) const;
+    void TraceOnPrepareTiny(const vpaxos_rpc::Prepare &request) const;
+    void TracePrepareReply(const vpaxos_rpc::PrepareReply &reply, const std::string &address) const;
+    void TracePrepareReplyTiny(const vpaxos_rpc::PrepareReply &reply, const std::string &address) const;
+    void TraceOnAccept(const vpaxos_rpc::Accept &request) const;
+    void TraceOnAcceptTiny(const vpaxos_rpc::Accept &request) const;
+    void TraceAcceptReply(const vpaxos_rpc::AcceptReply &reply, const std::string &address) const;
+    void TraceAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply, const std::string &address) const;
 };
 
 } // namespace vpaxos

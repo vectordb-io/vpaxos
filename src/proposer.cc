@@ -9,6 +9,139 @@
 
 namespace vpaxos {
 
+jsonxx::json64
+PrepareManager::ToJson() const {
+    jsonxx::json64 j, jj;
+    j["accept"] = accept_;
+    j["quorum_"] = quorum_;
+    j["promised_ballot"] = promised_ballot_.ToJson();
+    j["max_accepted_ballot"] = max_accepted_ballot_.ToJson();
+    j["accepted_value"] = accepted_value_;
+    for (auto &kv : votes_) {
+        j["votes"][kv.first] = ::vpaxos::ToJson(kv.second);
+    }
+    jj["PrepareManager"] = j;
+    return jj;
+}
+
+std::string
+PrepareManager::ToString() const {
+    return ToJson().dump();
+}
+
+std::string
+PrepareManager::ToStringPretty() const {
+    return ToJson().dump(4, ' ');
+}
+
+jsonxx::json64
+PrepareManager::ToJsonTiny() const {
+    jsonxx::json64 j;
+    j["promised_bal"] = promised_ballot_.ToJsonTiny();
+    j["max_bal"] = max_accepted_ballot_.ToJsonTiny();
+    j["accepted_value"] = accepted_value_;
+
+    int votes = votes_.size();
+    char buf[128];
+    snprintf(buf, sizeof(buf), "%d-%d", quorum_, votes);
+    j["votes"] = std::string(buf);
+    return j;
+}
+
+std::string
+PrepareManager::ToStringTiny() const {
+    return ToJsonTiny().dump();
+}
+
+jsonxx::json64
+AcceptManager::ToJson() const {
+    jsonxx::json64 j, jj;
+    j["learn"] = learn_;
+    j["quorum_"] = quorum_;
+    j["accepted_ballot"] = accepted_ballot_.ToJson();
+    j["accepted_value"] = accepted_value_;
+    for (auto &kv : votes_) {
+        j["votes"][kv.first] = ::vpaxos::ToJson(kv.second);
+    }
+    jj["AcceptManager"] = j;
+    return jj;
+}
+
+std::string
+AcceptManager::ToString() const {
+    return ToJson().dump();
+}
+
+std::string
+AcceptManager::ToStringPretty() const {
+    return ToJson().dump(4, ' ');
+}
+
+jsonxx::json64
+AcceptManager::ToJsonTiny() const {
+    jsonxx::json64 j;
+    j["accepted_bal"] = accepted_ballot_.ToJsonTiny();
+    j["accepted_value"] = accepted_value_;
+
+    int votes = votes_.size();
+    char buf[128];
+    snprintf(buf, sizeof(buf), "%d-%d", quorum_, votes);
+    j["votes"] = std::string(buf);
+    return j;
+}
+
+std::string
+AcceptManager::ToStringTiny() const {
+    return ToJsonTiny().dump();
+}
+
+jsonxx::json64
+Proposer::ToJson() const {
+    jsonxx::json64 j, jj;
+    j["propose_value"] = propose_value_;
+    j["proposing"] = proposing_;
+    j["prepare_manager"] = prepare_manager_.ToJson();;
+    j["accept_manager"] = accept_manager_.ToJson();;
+
+    Ballot mb;
+    Status s = MaxBallot(mb);
+    assert(s.ok());
+    j["max_ballot"] = mb.ToJson();
+
+    jj["Proposer"] = j;
+    return jj;
+}
+
+std::string
+Proposer::ToString() const {
+    return ToJson().dump();
+}
+
+std::string
+Proposer::ToStringPretty() const {
+    return ToJson().dump(4, ' ');
+}
+
+jsonxx::json64
+Proposer::ToJsonTiny() const {
+    jsonxx::json64 j, jj;
+    Ballot mb;
+    Status s = MaxBallot(mb);
+    assert(s.ok());
+    j["1.max_bal"] = mb.ToJsonTiny();
+    j["2.proposing"] = proposing_;
+    j["3.propose_value"] = propose_value_;
+    j["4.prepare_mgr"] = prepare_manager_.ToJsonTiny();;
+    j["5.accept_mgr"] = accept_manager_.ToJsonTiny();;
+    jj["Proposer"] = j;
+    return jj;
+}
+
+std::string
+Proposer::ToStringTiny() const {
+    return ToJsonTiny().dump();
+}
+
 PrepareManager::PrepareManager(int quorum)
     :accept_(false),
      quorum_(quorum) {
@@ -73,54 +206,6 @@ PrepareManager::AcceptedValue() const {
     return accepted_value_;
 }
 
-std::string
-PrepareManager::ToString() const {
-    std::string str;
-    char buf[256];
-    str.append("PrepareManager:\n");
-
-    str.append("promised_ballot_: ");
-    if (promised_ballot_.IsNull()) {
-        str.append("null");
-    } else {
-        str.append(promised_ballot_.ToString());
-    }
-    str.append("\n");
-
-    if (max_accepted_ballot_.IsNull()) {
-        str.append("max_accepted_ballot_: null");
-        str.append("\n");
-        str.append("accepted_value_: null");
-        str.append("\n");
-    } else {
-        str.append("max_accepted_ballot_: ");
-        str.append(max_accepted_ballot_.ToString());
-        str.append("\n");
-        str.append("accepted_value_: ");
-        str.append(accepted_value_);
-        str.append("\n");
-    }
-
-    snprintf(buf, sizeof(buf), "quorum_: %d", quorum_);
-    str.append(buf);
-    str.append("\n");
-
-    snprintf(buf, sizeof(buf), "agree: %lu", votes_.size());
-    str.append(buf);
-    str.append("\n");
-
-    str.append("votes_:\n");
-    for (auto &a : votes_) {
-        str.append(a.first);
-        str.append(" --> \n");
-        str.append("<<\n");
-        str.append(a.second.DebugString());
-        str.append(">>\n");
-    }
-
-    return str;
-}
-
 AcceptManager::AcceptManager(int quorum)
     :learn_(false),
      quorum_(quorum) {
@@ -175,44 +260,6 @@ AcceptManager::Majority() const {
     return static_cast<int>(votes_.size()) >= quorum_;
 }
 
-std::string
-AcceptManager::ToString() const {
-    std::string str;
-    char buf[256];
-    str.append("AcceptManager:\n");
-
-    str.append("accepted_ballot_: ");
-    if (accepted_ballot_.IsNull()) {
-        str.append("null");
-    } else {
-        str.append(accepted_ballot_.ToString());
-    }
-    str.append("\n");
-
-    str.append("accepted_value_: ");
-    str.append(accepted_value_);
-    str.append("\n");
-
-    snprintf(buf, sizeof(buf), "quorum_: %d", quorum_);
-    str.append(buf);
-    str.append("\n");
-
-    snprintf(buf, sizeof(buf), "agree: %lu", votes_.size());
-    str.append(buf);
-    str.append("\n");
-
-    str.append("votes_:\n");
-    for (auto &a : votes_) {
-        str.append(a.first);
-        str.append(" --> \n");
-        str.append("<<\n");
-        str.append(a.second.DebugString());
-        str.append(">>\n");
-    }
-
-    return str;
-}
-
 Proposer::Proposer()
     :proposing_(false),
      prepare_manager_(Config::GetInstance().Quorum()),
@@ -254,9 +301,6 @@ Proposer::NextBallot() {
 
 void
 Proposer::NextBallot(Ballot b) {
-
-    LOG(INFO) << "debug NextBallot begin " << "input:" << b.ToString() << " current_ballot_:" << current_ballot_.ToString();
-
     Status s;
     s = MaxBallot(current_ballot_);
     assert(s.ok());
@@ -269,11 +313,6 @@ Proposer::NextBallot(Ballot b) {
 
     s = PersistMaxBallot(current_ballot_);
     assert(s.ok());
-
-
-
-    LOG(INFO) << "debug NextBallot end " << "input:" << b.ToString() << " current_ballot_:" << current_ballot_.ToString();
-
 }
 
 Status
@@ -285,7 +324,6 @@ Proposer::Propose(std::string value, void *flag) {
 
     auto s = PrepareAll(flag);
     assert(s.ok());
-
     return Status::OK();
 }
 
@@ -293,8 +331,6 @@ Status
 Proposer::PrepareAll(void *flag) {
     Status s;
     vpaxos_rpc::Prepare request;
-
-    LOG(INFO) << "PrepareAll debug:" << current_ballot_.ToString();
 
     Ballot2Pb(current_ballot_, *request.mutable_ballot());
     Ballot2Pb(current_ballot_, *request.mutable_trace_ballot());
@@ -328,20 +364,14 @@ Proposer::AcceptAll(void *flag) {
         s = Accept(request, hp->ToString());
         assert(s.ok());
     }
-
     return Status::OK();
 }
 
 void
 Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
-    DebugLog(false, __FUNCTION__, "x.x.x.x", &request);
-
-    LOG(INFO) << "OnPropose call:" << async_flag;
-
+    TraceOnProposeTiny(request);
+    TraceOnPropose(request);
     if (proposing_) {
-
-        LOG(INFO) << "debug: proposing call:" << async_flag;
-
         vpaxos_rpc::ProposeReply reply;
         reply.set_err_code(2);
         std::string err_msg = "proposing value: ";
@@ -349,7 +379,6 @@ Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
         reply.set_err_msg(err_msg);
         Env::GetInstance().AsyncProposeReply(reply, async_flag);
     }
-
     proposing_ = true;
     auto s = Propose(request.value(), async_flag);
     assert(s.ok());
@@ -357,8 +386,8 @@ Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
 
 Status
 Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address) {
-    DebugLog(true, __FUNCTION__, address, &request);
-    Node::GetInstance().Sleep(100, 200);
+    TracePrepareTiny(request, address);
+    TracePrepare(request, address);
 
     auto s = Env::GetInstance().AsyncPrepare(
                  request,
@@ -370,7 +399,8 @@ Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address
 
 Status
 Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
-    DebugLog(false, __FUNCTION__, reply.address(), &reply);
+    TraceOnPrepareReplyTiny(reply);
+    TraceOnPrepareReply(reply);
 
     Status s;
     Ballot receive_ballot;
@@ -398,11 +428,11 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
                   << " receive_ballot:[" << receive_ballot.ToString() << "]";
 
 
-        LOG(INFO) << "debug NextBallot call begin: " << "input:" << receive_ballot.ToString() << " current_ballot_:" << current_ballot_.ToString();
+//        LOG(INFO) << "debug NextBallot call begin: " << "input:" << receive_ballot.ToString() << " current_ballot_:" << current_ballot_.ToString();
 
         NextBallot(receive_ballot);
 
-        LOG(INFO) << "debug NextBallot call end: " << "input:" << receive_ballot.ToString() << " current_ballot_:" << current_ballot_.ToString();
+//        LOG(INFO) << "debug NextBallot call end: " << "input:" << receive_ballot.ToString() << " current_ballot_:" << current_ballot_.ToString();
 
 
         LOG(INFO) << "after rejected, next_ballot: [" << current_ballot_.ToString() << "]";
@@ -417,8 +447,9 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
 
 Status
 Proposer::Accept(const vpaxos_rpc::Accept &request, const std::string &address) {
-    DebugLog(true, __FUNCTION__, address, &request);
-    Node::GetInstance().Sleep(100, 200);
+    //Node::GetInstance().Sleep(100, 200);
+    TraceAcceptTiny(request, address);
+    TraceAccept(request, address);
 
     auto s = Env::GetInstance().AsyncAccept(
                  request,
@@ -430,7 +461,8 @@ Proposer::Accept(const vpaxos_rpc::Accept &request, const std::string &address) 
 
 Status
 Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
-    DebugLog(false, __FUNCTION__, reply.address(), &reply);
+    TraceOnAcceptReplyTiny(reply);
+    TraceOnAcceptReply(reply);
 
     Status s;
     Ballot receive_ballot;
@@ -454,7 +486,7 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
         accept_manager_.Vote(reply);
         if (accept_manager_.Majority()) {
             std::string log_str;
-            log_str.append("value chosen:[").append(accept_manager_.AcceptedValue())
+            log_str.append("tiny trace proposer value chosen:[").append(accept_manager_.AcceptedValue())
             .append("] current_ballot_:[").append(current_ballot_.ToString()).append("]\n\n")
             .append("prepare_manager_:").append(prepare_manager_.ToString()).append("\n")
             .append("accept_manager_:").append(accept_manager_.ToString()).append("\n");
@@ -504,9 +536,6 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
 Status
 Proposer::MaxBallot(Ballot &ballot) const {
     auto s = Env::GetInstance().MaxBallot(ballot);
-
-    LOG(INFO) << "debug: MaxBallot" << ballot.ToString();
-
     return s;
 }
 
@@ -517,74 +546,113 @@ Proposer::PersistMaxBallot(const Ballot &ballot) {
 }
 
 void
-Proposer::DebugLog(bool is_send, std::string header, std::string address, const google::protobuf::Message *m) {
-    std::string str;
-    char buf[256];
+Proposer::TraceOnPropose(const vpaxos_rpc::Propose &request) const {
+    std::string s;
+    std::string state = ToStringPretty();
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+    s.append(state).append("\n\n");
+    s.append("receive from : x.x.x.x").append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
 
-    snprintf(buf, sizeof(buf), " <tid:%ld>", gettid());
+void
+Proposer::TraceOnProposeTiny(const vpaxos_rpc::Propose &request) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    RecvFrom-x.x.x.x-").append(::vpaxos::ToStringTiny(request));
+    LOG(INFO) << s;
+}
 
-    str.append("\n");
-    if (is_send) {
-        str.append("|--------------send message---------------|").append(buf);
-    } else {
-        str.append("|==============receive message============|").append(buf);
-    }
-    str.append("\n");
+void
+Proposer::TracePrepare(const vpaxos_rpc::Prepare &request, const std::string &address) const {
+    std::string s;
+    std::string state = ToStringPretty();
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+    s.append(state).append("\n\n");
+    s.append("send to : ").append(address).append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
 
-    str.append("header:");
-    str.append(header);
-    str.append("\n");
+void
+Proposer::TracePrepareTiny(const vpaxos_rpc::Prepare &request, const std::string &address) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    SendTo-").append(address).append("-").append(::vpaxos::ToStringTiny(request));
+    LOG(INFO) << s;
+}
 
-    if (is_send) {
-        str.append("to address:").append(address);
-    } else {
-        str.append("from address:").append(address);
-    }
-    str.append("\n");
+void
+Proposer::TraceOnPrepareReply(const vpaxos_rpc::PrepareReply &reply) const {
+    std::string s;
+    std::string state = ToStringPretty();
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+    s.append(state).append("\n\n");
+    s.append("recv from : ").append(reply.address()).append(":\n");
+    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    LOG(INFO) << s;
+}
 
-    str.append("my address:").append(Config::GetInstance().MyAddress()->ToString());
-    str.append("\n");
+void
+Proposer::TraceOnPrepareReplyTiny(const vpaxos_rpc::PrepareReply &reply) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringTiny(reply));
+    LOG(INFO) << s;
+}
 
-    snprintf(buf, sizeof(buf), "my node_id:%lu", Node::GetInstance().Id());
-    str.append(buf);
-    str.append("\n");
+void
+Proposer::TraceAccept(const vpaxos_rpc::Accept &request, const std::string &address) const {
+    std::string s;
+    std::string state = ToStringPretty();
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+    s.append(state).append("\n\n");
+    s.append("send to : ").append(address).append(":\n");
+    s.append(::vpaxos::ToStringPretty(request)).append("\n\n");
+    LOG(INFO) << s;
+}
 
-    str.append("current_ballot_:").append(current_ballot_.ToString());
-    str.append("\n");
+void
+Proposer::TraceAcceptTiny(const vpaxos_rpc::Accept &request, const std::string &address) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    SendTo-").append(address).append("-").append(::vpaxos::ToStringTiny(request));
+    LOG(INFO) << s;
+}
 
-    snprintf(buf, sizeof(buf), "propose_value_: [%s]", propose_value_.c_str());
-    str.append(buf);
-    str.append("\n");
+void
+Proposer::TraceOnAcceptReply(const vpaxos_rpc::AcceptReply &reply) const {
+    std::string s;
+    std::string state = ToStringPretty();
+    s.append("node:").append(Node::GetInstance().id().ToString()).append("\n");
+    s.append("verbose trace proposer:\n\n");
+    s.append(state).append("\n\n");
+    s.append("recv from : ").append(reply.address()).append(":\n");
+    s.append(::vpaxos::ToStringPretty(reply)).append("\n\n");
+    LOG(INFO) << s;
+}
 
-    str.append("\n");
-    str.append(prepare_manager_.ToString());
-    str.append("\n");
-
-    str.append(accept_manager_.ToString());
-    str.append("\n");
-
-    Status s;
-    str.append("store_max_ballot:");
-    Ballot store_max_ballot;
-    s = MaxBallot(store_max_ballot);
-    assert(s.ok());
-    if (store_max_ballot.IsNull()) {
-        str.append("null");
-    } else {
-        str.append(store_max_ballot.ToString());
-    }
-    str.append("\n");
-
-    if (is_send) {
-        str.append("send message:\n<<\n").append(m->DebugString()).append(">>\n");
-        str.append("|-----------------------------------------|");
-    } else {
-        str.append("receive message:\n<<\n").append(m->DebugString()).append(">>\n");
-        str.append("|=========================================|");
-    }
-    str.append("\n");
-
-    LOG(INFO) << str;
+void
+Proposer::TraceOnAcceptReplyTiny(const vpaxos_rpc::AcceptReply &reply) const {
+    std::string s;
+    std::string state = "State-" + ToStringTiny();
+    s.append("tiny trace proposer: ").append(Node::GetInstance().id().ToStringTiny());
+    s.append("    ").append(state);
+    s.append("    RecvFrom-").append(reply.address()).append("-").append(::vpaxos::ToStringTiny(reply));
+    LOG(INFO) << s;
 }
 
 } // namespace vpaxos

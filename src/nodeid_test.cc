@@ -26,5 +26,13 @@ int main() {
         std::cout << "-----------------------------" << std::endl << std::endl;
     }
 
+    {
+        vpaxos::NodeId n(0);
+        std::cout << n.ToString() << std::endl;
+        std::cout << n.ToStringTiny() << std::endl;
+        std::cout << n.ToStringPretty() << std::endl;
+        std::cout << "-----------------------------" << std::endl << std::endl;
+    }
+
     return 0;
 }

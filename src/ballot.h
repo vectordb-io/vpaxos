@@ -2,6 +2,8 @@
 #define __VPAXOS_BALLOT_H__
 
 #include <stdint.h>
+#include "jsonxx/json.hpp"
+#include "nodeid.h"
 
 namespace vpaxos {
 
@@ -38,12 +40,6 @@ class Ballot {
 
     bool IsNull() const {
         return (proposal_id_ == 0 && node_id_ == 0);
-    }
-
-    std::string ToString() const {
-        char buf[128];
-        snprintf(buf, sizeof(buf), "node_id:%lu, proposal_id:%lu", node_id_, proposal_id_);
-        return std::string(buf);
     }
 
     // ballot++, not ++ballot
@@ -91,6 +87,35 @@ class Ballot {
 
     uint64_t node_id() const {
         return node_id_;
+    }
+
+    jsonxx::json64 ToJson() const {
+        jsonxx::json64 j, jj;
+        j["proposal_id"] = proposal_id_;
+        NodeId n(node_id_);
+        j["node_id"] = n.ToJson();
+        jj["Ballot"] = j;
+        return jj;
+    }
+
+    std::string ToString() const {
+        return ToJson().dump();
+    }
+
+    std::string ToStringPretty() const {
+        return ToJson().dump(4, ' ');
+    }
+
+    jsonxx::json64 ToJsonTiny() const {
+        jsonxx::json64 j;
+        j["proposal"] = proposal_id_;
+        NodeId n(node_id_);
+        j["node"] = n.ToJsonTiny();
+        return j;
+    }
+
+    std::string ToStringTiny() const {
+        return ToJsonTiny().dump();
     }
 
   private:
