@@ -28,21 +28,21 @@ TracePropose(const std::string &address, const vpaxos_rpc::Propose &request, vpa
     snprintf(buf, sizeof(buf), "tid:%ld ", gettid());
     s.append(std::string(buf));
 
-    s.append("  st:");
+    s.append("  st-");
     s.append(address);
-    s.append(":");
-    s.append(vpaxos::ToString(request));
-    s.append("  rf:");
+    s.append("-");
+    s.append(vpaxos::ToStringTiny(request));
+    s.append("  rf-");
     s.append(address);
-    s.append(":");
-    s.append(vpaxos::ToString(reply));
+    s.append("-");
+    s.append(vpaxos::ToStringTiny(reply));
     printf("%s\n", s.c_str());
     fflush(nullptr);
 }
 
 void
 Propose(const std::string &address, const std::string &value) {
-    std::uniform_int_distribution<int> random_range(100, 500);
+    std::uniform_int_distribution<int> random_range(10, 50);
     int timeout_ms = random_range(random_);
     std::cout << "sleep " << timeout_ms << " ms" << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));

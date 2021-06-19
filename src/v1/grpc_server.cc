@@ -28,9 +28,16 @@ GrpcServer::AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call)
 
         AsyncTaskOnPropose *p = static_cast<AsyncTaskOnPropose*>(call);
         p->done_ = true;
+
+        p->reply_.CopyFrom(reply);
+
+        /*
         p->reply_.set_code(reply.code());
         p->reply_.set_msg(reply.msg());
         p->reply_.set_chosen_value(reply.chosen_value());
+        p->reply_.set
+        */
+
         p->responder_.Finish(p->reply_, grpc::Status::OK, p);
         async_req_manager_.Delete(p);
     } else {

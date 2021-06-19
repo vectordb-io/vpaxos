@@ -67,7 +67,7 @@ echo "${host} ${start_port} ${path} ${is_timeout} ${is_learner_optimized} ${node
 }' > tmp_start.sh
 
 sh tmp_start.sh
-#rm tmp_start.sh
+rm tmp_start.sh
 
 
 

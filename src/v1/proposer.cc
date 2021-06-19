@@ -332,16 +332,30 @@ Proposer::PrepareAll(void *flag) {
     Status s;
     vpaxos_rpc::Prepare request;
 
+    Node::GetInstance().Sleep();
+    if (Config::GetInstance().learner_optimized()) {
+        if (Node::GetInstance().learner()->Chosen()) {
+            std::string chosen_value;
+            Status s = Node::GetInstance().learner()->ChosenValue(chosen_value);
+            assert(s.ok());
+
+            vpaxos_rpc::ProposeReply reply;
+            reply.set_code(2);
+            reply.set_msg("learner-optimized value chosen");
+            reply.set_chosen_value(chosen_value);
+            Env::GetInstance().AsyncProposeReply(reply, flag);
+            return Status::OK();
+        }
+    }
+
     Ballot2Pb(current_ballot_, *request.mutable_ballot());
     Ballot2Pb(current_ballot_, *request.mutable_trace_ballot());
     request.set_address(Config::GetInstance().MyAddress()->ToString());
     request.set_async_flag(reinterpret_cast<uint64_t>(flag));
-
     for (auto &hp : Config::GetInstance().address()) {
         s = Prepare(request, hp->ToString());
         assert(s.ok());
     }
-
     return Status::OK();
 }
 
@@ -371,23 +385,10 @@ void
 Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
     TraceOnPropose(request);
 
-    if (Config::GetInstance().learner_optimized()) {
-        if (Node::GetInstance().learner()->Chosen()) {
-            std::string chosen_value;
-            Status s = Node::GetInstance().learner()->ChosenValue(chosen_value);
-            assert(s.ok());
-
-            vpaxos_rpc::ProposeReply reply;
-            reply.set_code(0);
-            reply.set_msg("learner-optimized value chosen");
-            reply.set_chosen_value(chosen_value);
-            Env::GetInstance().AsyncProposeReply(reply, async_flag);
-        }
-    }
 
     if (proposing_) {
         vpaxos_rpc::ProposeReply reply;
-        reply.set_code(2);
+        reply.set_code(9);
         std::string err_msg = "proposing value: ";
         err_msg.append(propose_value_);
         reply.set_msg(err_msg);
@@ -400,7 +401,6 @@ Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
 
 Status
 Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address) {
-    Node::GetInstance().Sleep();
     TracePrepare(request, address);
     auto s = Env::GetInstance().AsyncPrepare(
                  request,
@@ -458,7 +458,6 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
 
 Status
 Proposer::Accept(const vpaxos_rpc::Accept &request, const std::string &address) {
-    Node::GetInstance().Sleep();
     TraceAccept(request, address);
     auto s = Env::GetInstance().AsyncAccept(
                  request,
@@ -507,14 +506,20 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
             std::string err_msg;
             if (propose_value_ == accept_manager_.AcceptedValue()) {
                 propose_reply.set_code(0);
-                err_msg = "value chosen: ";
+                err_msg = "ok";
             } else {
                 propose_reply.set_code(1);
-                err_msg = "another value chosen: ";
+                err_msg = "another value chosen";
             }
-            err_msg.append(accept_manager_.AcceptedValue());
+            //err_msg.append(accept_manager_.AcceptedValue());
             propose_reply.set_msg(err_msg);
             propose_reply.set_chosen_value(accept_manager_.AcceptedValue());
+            Ballot2Pb(accept_manager_.accepted_ballot(), *(propose_reply.mutable_ballot()));
+            LOG(INFO) << "debug 1:" << accept_manager_.accepted_ballot().ToString();
+            LOG(INFO) << "debug 2:" << ::vpaxos::ToString(propose_reply.ballot());
+            LOG(INFO) << "debug 3:" << ::vpaxos::ToString(propose_reply);
+            LOG(INFO) << "debug 4:" << ::vpaxos::ToStringTiny(propose_reply);
+
             uint64_t flag = reply.async_flag();
             Env::GetInstance().AsyncProposeReply(propose_reply, reinterpret_cast<void*>(flag));
 

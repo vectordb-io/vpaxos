@@ -150,6 +150,7 @@ ToJson(const vpaxos_rpc::ProposeReply &pb) {
     j["code"] = pb.code();
     j["msg"] = pb.msg();
     j["chosen_value"] = pb.chosen_value();
+    j["ballot"] = ToJson(pb.ballot());
     jj["ProposeReply"] = j;
     return jj;
 }
@@ -169,6 +170,7 @@ ToJsonTiny(const vpaxos_rpc::ProposeReply &pb) {
     jsonxx::json64 j, jj;
     j[0] = pb.msg();
     j[1] = pb.chosen_value();
+    j[2] = ToJsonTiny(pb.ballot());
     jj["ProposeReply"] = j;
     return jj;
 }

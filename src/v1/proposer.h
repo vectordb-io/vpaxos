@@ -59,6 +59,10 @@ class AcceptManager {
     void set_learn();
     std::string AcceptedValue() const;
 
+    const Ballot& accepted_ballot() const {
+        return accepted_ballot_;
+    }
+
     jsonxx::json64 ToJson() const;
     std::string ToString() const;
     std::string ToStringPretty() const;

@@ -28,6 +28,7 @@ message ProposeReply {
   int32 code = 1;
   string msg = 2;
   string chosen_value = 3;
+  Ballot ballot = 4;
 }
 
 message Ballot {
