@@ -25,7 +25,7 @@ class Node {
     Node(const Node&) = delete;
     Node& operator=(const Node&) = delete;
     Status Init();
-    uint64_t Id();
+    //uint64_t Id();
 
     void OnPing(const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply);
     Status Ping(const vpaxos_rpc::Ping &request, const std::string &address);

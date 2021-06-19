@@ -22,9 +22,6 @@ class PrepareManager {
     void Vote(const vpaxos_rpc::PrepareReply &reply);
     bool Majority() const;
     void Reset(Ballot promised_ballot);
-
-    bool accept() const;
-    void set_accept();
     bool HasAcceptedValue() const;
     std::string AcceptedValue() const;
 
@@ -34,6 +31,14 @@ class PrepareManager {
     jsonxx::json64 ToJsonTiny() const;
     std::string ToStringTiny() const;
 
+    bool accept() const {
+        return accept_;
+    }
+
+    void set_accept() {
+        accept_ = true;
+    }
+
   private:
     bool accept_;
     int quorum_;
@@ -42,7 +47,6 @@ class PrepareManager {
     std::string accepted_value_; // max_accepted_ballot_ is not null
     std::map<std::string, vpaxos_rpc::PrepareReply> votes_;
 };
-
 
 class AcceptManager {
   public:
@@ -54,20 +58,24 @@ class AcceptManager {
     void Vote(const vpaxos_rpc::AcceptReply &reply);
     bool Majority() const;
     void Reset(Ballot accepted_ballot);
-
-    bool learn() const;
-    void set_learn();
     std::string AcceptedValue() const;
-
-    const Ballot& accepted_ballot() const {
-        return accepted_ballot_;
-    }
 
     jsonxx::json64 ToJson() const;
     std::string ToString() const;
     std::string ToStringPretty() const;
     jsonxx::json64 ToJsonTiny() const;
     std::string ToStringTiny() const;
+
+    bool learn() const {
+        return learn_;
+    }
+    void set_learn() {
+        learn_ = true;
+    }
+
+    const Ballot& accepted_ballot() const {
+        return accepted_ballot_;
+    }
 
   private:
     bool learn_;
@@ -76,7 +84,6 @@ class AcceptManager {
     std::string accepted_value_;
     std::map<std::string, vpaxos_rpc::AcceptReply> votes_;
 };
-
 
 class Proposer {
   public:

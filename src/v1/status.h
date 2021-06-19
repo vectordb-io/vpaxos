@@ -41,8 +41,8 @@ class Status {
     static Status InvalidArgument(const Slice& msg, const Slice& msg2 = Slice()) {
         return Status(kInvalidArgument, msg, msg2);
     }
-    static Status IOError(const Slice& msg, const Slice& msg2 = Slice()) {
-        return Status(kIOError, msg, msg2);
+    static Status Error(const Slice& msg, const Slice& msg2 = Slice()) {
+        return Status(kError, msg, msg2);
     }
 
     // Returns true iff the status indicates success.
@@ -60,9 +60,9 @@ class Status {
         return code() == kCorruption;
     }
 
-    // Returns true iff the status indicates an IOError.
-    bool IsIOError() const {
-        return code() == kIOError;
+    // Returns true iff the status indicates an Error.
+    bool IsError() const {
+        return code() == kError;
     }
 
     // Returns true iff the status indicates a NotSupportedError.
@@ -86,7 +86,7 @@ class Status {
         kCorruption = 2,
         kNotSupported = 3,
         kInvalidArgument = 4,
-        kIOError = 5
+        kError = 5
     };
 
     Code code() const {

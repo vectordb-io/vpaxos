@@ -33,6 +33,7 @@ Node::Init() {
     return Status::OK();
 }
 
+/*
 uint64_t
 Node::Id() {
     uint32_t ip = (uint32_t)inet_addr(Config::GetInstance().MyAddress()->host_.c_str());
@@ -40,6 +41,7 @@ Node::Id() {
     uint64_t node_id = (static_cast<uint64_t>(ip) << 32) | Config::GetInstance().MyAddress()->port_;
     return node_id;
 }
+*/
 
 void
 Node::OnPing(const vpaxos_rpc::Ping &request, vpaxos_rpc::PingReply &reply) {
