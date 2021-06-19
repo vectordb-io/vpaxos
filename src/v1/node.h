@@ -14,7 +14,6 @@
 
 namespace vpaxos {
 
-
 class Node {
   public:
     static Node&
@@ -49,7 +48,11 @@ class Node {
         return id_;
     }
 
-    void Sleep(int min, int max) const;
+    void set_max_timeout_ms(int tm) {
+        max_timeout_ms_ = tm;
+    }
+
+    void Sleep() const;
 
   private:
     Node();
@@ -62,7 +65,9 @@ class Node {
     Proposer proposer_;
     Acceptor acceptor_;
     Learner learner_;
+
     NodeId id_;
+    int max_timeout_ms_;
 };
 
 

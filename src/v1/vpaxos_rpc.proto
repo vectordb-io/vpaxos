@@ -25,8 +25,8 @@ message Propose {
 }
 
 message ProposeReply {
-  int32 err_code = 1;
-  string err_msg = 2;
+  int32 code = 1;
+  string msg = 2;
   string chosen_value = 3;
 }
 

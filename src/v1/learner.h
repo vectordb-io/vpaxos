@@ -18,9 +18,10 @@ class Learner {
     Status OnLearnReply(const vpaxos_rpc::LearnReply &reply);
     Status LearnAll(std::string chosen_value);
 
-  private:
     bool Chosen() const;
     Status ChosenValue(std::string &chosen_value) const;
+
+  private:
     Status PersistChosenValue(const std::string &chosen_value);
 
   private: // for debug

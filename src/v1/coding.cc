@@ -147,8 +147,8 @@ ToStringMini(const vpaxos_rpc::Propose &pb) {
 jsonxx::json64
 ToJson(const vpaxos_rpc::ProposeReply &pb) {
     jsonxx::json64 j, jj;
-    j["err_code"] = pb.err_code();
-    j["err_msg"] = pb.err_msg();
+    j["code"] = pb.code();
+    j["msg"] = pb.msg();
     j["chosen_value"] = pb.chosen_value();
     jj["ProposeReply"] = j;
     return jj;
@@ -167,7 +167,7 @@ ToStringPretty(const vpaxos_rpc::ProposeReply &pb) {
 jsonxx::json64
 ToJsonTiny(const vpaxos_rpc::ProposeReply &pb) {
     jsonxx::json64 j, jj;
-    j[0] = pb.err_msg();
+    j[0] = pb.msg();
     j[1] = pb.chosen_value();
     jj["ProposeReply"] = j;
     return jj;
@@ -181,7 +181,7 @@ ToStringTiny(const vpaxos_rpc::ProposeReply &pb) {
 jsonxx::json64
 ToJsonMini(const vpaxos_rpc::ProposeReply &pb) {
     jsonxx::json64 j, jj;
-    j[0] = pb.err_msg();
+    j[0] = pb.msg();
     jj["ProposeReply"] = j;
     return jj;
 }

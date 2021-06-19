@@ -21,9 +21,9 @@ PrintHelp() {
 
     std::cout << std::endl;
     std::cout << "normal: " << std::endl;
-    std::cout << exe_name << " --me=127.0.0.1:38000 --peers=127.0.0.1:38001,127.0.0.1:38002 --path=/tmp/vpaxos/127.0.0.1:38000" << std::endl;
-    std::cout << exe_name << " --me=127.0.0.1:38001 --peers=127.0.0.1:38000,127.0.0.1:38002 --path=/tmp/vpaxos/127.0.0.1:38001" << std::endl;
-    std::cout << exe_name << " --me=127.0.0.1:38002 --peers=127.0.0.1:38000,127.0.0.1:38001 --path=/tmp/vpaxos/127.0.0.1:38002" << std::endl;
+    std::cout << exe_name << " --me=127.0.0.1:38000 --peers=127.0.0.1:38001,127.0.0.1:38002 --path=/tmp/vpaxos/127.0.0.1:38000 --max_timeout=100 --learner-optimized" << std::endl;
+    std::cout << exe_name << " --me=127.0.0.1:38001 --peers=127.0.0.1:38000,127.0.0.1:38002 --path=/tmp/vpaxos/127.0.0.1:38001 --max_timeout=100 --learner-optimized" << std::endl;
+    std::cout << exe_name << " --me=127.0.0.1:38002 --peers=127.0.0.1:38000,127.0.0.1:38001 --path=/tmp/vpaxos/127.0.0.1:38002 --max_timeout=100 --learner-optimized" << std::endl;
     std::cout << exe_name << " -h" << std::endl;
     std::cout << exe_name << " --help" << std::endl;
 

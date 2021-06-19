@@ -42,92 +42,53 @@ class Config {
     Config(const Config&) = delete;
     Config& operator=(const Config&) = delete;
 
-    std::string DebugString() {
-        std::string s;
-        s.append("\n[\n");
-        s.append("address: \n");
-        for (auto hp : address_) {
-            s.append(hp->ToString());
-            s.append("\n");
-        }
-        s.append("]\n");
-        return s;
-    }
-
-    int Quorum() {
-        int n = address_.size();
-        return n /  2 + 1;
-    }
-
     Status Load(int argc, char **argv);
+    std::string DebugString() const;
+    int Quorum() const;
 
-    std::shared_ptr<HostAndPort>
-    MyAddress() {
-        auto it = address_.begin();
-        if (it != address_.end()) {
-            return *it;
-        } else {
-            return std::shared_ptr<HostAndPort>();
-        }
-    }
+    std::shared_ptr<HostAndPort> MyAddress();
+
 
     bool ping() const {
         return ping_;
+    }
+
+    bool learner_optimized() const {
+        return learner_optimized_;
     }
 
     const std::string& storage_path() const {
         return storage_path_;
     }
 
-    // address_[0] is mine
-    std::vector<std::shared_ptr<HostAndPort>> address_;
+    int max_timeout_ms() const {
+        return max_timeout_ms_;
+    }
+
+    std::vector<std::shared_ptr<HostAndPort>>& mutable_address() {
+        return address_;
+    }
+
+    const std::vector<std::shared_ptr<HostAndPort>>& address() const {
+        return address_;
+    }
 
   private:
-    Config()
-        :ping_(false) {
-    }
+    Config();
+    ~Config();
 
-    ~Config() {}
-
-    // intput:
-    // hp = 127.0.0.1:38000
-    // output:
-    // host = 127.0.0.1
-    // port = 38000
-    void ParseHostPort(std::string &hp, std::string &host, int &port) {
-        char* psave = nullptr;
-        const char *d = ":";
-        char *p;
-        p = strtok_r((char*)hp.c_str(), d, &psave);
-        host = std::string(p);
-        p = strtok_r(nullptr, d, &psave);
-        sscanf(p, "%d", &port);
-    }
-
-    void ParseOne(std::string s, vpaxos::HostAndPort &hp) {
-        ParseHostPort(s, hp.host_, hp.port_);
-    }
-
-    void ParsePeers(std::string s, std::vector<vpaxos::HostAndPort> &v) {
-        char* psave = nullptr;
-        const char *d = ",";
-        char *p;
-        p = strtok_r((char*)s.c_str(), d, &psave);
-        while (p) {
-            std::string tmp(p);
-            vpaxos::HostAndPort hp;
-            ParseOne(tmp, hp);
-            v.push_back(hp);
-            p = strtok_r(nullptr, d, &psave);
-        }
-    }
-
-    void ParseMe(std::string s, vpaxos::HostAndPort &hp) {
-        ParseOne(s, hp);
-    }
+    void ParseHostPort(std::string &hp, std::string &host, int &port);
+    void ParseOne(std::string s, vpaxos::HostAndPort &hp);
+    void ParsePeers(std::string s, std::vector<vpaxos::HostAndPort> &v);
+    void ParseMe(std::string s, vpaxos::HostAndPort &hp);
 
     bool ping_;
+    bool learner_optimized_;
+    int max_timeout_ms_;
     std::string storage_path_;
+
+    // address_[0] is mine
+    std::vector<std::shared_ptr<HostAndPort>> address_;
 };
 
 } // namespace vpaxos

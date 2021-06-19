@@ -12,26 +12,24 @@ namespace vpaxos {
 std::default_random_engine random_(time(nullptr));
 
 Node::Node()
-    :id_(Config::GetInstance().MyAddress()->ToString()) {
+    :id_(Config::GetInstance().MyAddress()->ToString()),
+     max_timeout_ms_(-1) {
 }
 
 Status
 Node::Init() {
     Status s;
-
     Env::GetInstance().grpc_server()->set_on_ping_cb(
         std::bind(&Node::OnPing, this, std::placeholders::_1, std::placeholders::_2)
     );
+    max_timeout_ms_	= Config::GetInstance().max_timeout_ms();
 
     s = proposer_.Init();
     assert(s.ok());
-
     s = acceptor_.Init();
     assert(s.ok());
-
     s = learner_.Init();
     assert(s.ok());
-
     return Status::OK();
 }
 
@@ -75,7 +73,7 @@ Node::OnPingReply(const vpaxos_rpc::PingReply &reply) {
 
 Status
 Node::PingAll() {
-    for (auto &hp : Config::GetInstance().address_) {
+    for (auto &hp : Config::GetInstance().address()) {
         // do not send message to myself
         if (hp->ToString() == Config::GetInstance().MyAddress()->ToString()) {
             continue;
@@ -91,14 +89,16 @@ Node::PingAll() {
 }
 
 void
-Node::Sleep(int min, int max) const {
-    return;
-
-    std::uniform_int_distribution<int> random_range(min, max);
-    int timeout_ms = random_range(random_);
-    LOG(INFO) << "sleep " << timeout_ms << " ms";
-    std::this_thread::sleep_for(std::chrono::milliseconds(timeout_ms));
+Node::Sleep() const {
+    if (max_timeout_ms_ <= 0) {
+        return;
+    }
+    std::uniform_int_distribution<int> random_range(0, max_timeout_ms_);
+    int tm = random_range(random_);
+    LOG(INFO) << "sleep " << tm << " ms";
+    std::this_thread::sleep_for(std::chrono::milliseconds(tm));
 }
+
 
 void
 Node::TracePing(const vpaxos_rpc::Ping &request, const std::string &address) const {

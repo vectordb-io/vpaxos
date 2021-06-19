@@ -47,7 +47,7 @@ Learner::OnLearnReply(const vpaxos_rpc::LearnReply &reply) {
 
 Status
 Learner::LearnAll(std::string chosen_value) {
-    for (auto &hp : Config::GetInstance().address_) {
+    for (auto &hp : Config::GetInstance().address()) {
         vpaxos_rpc::Learn request;
         request.set_address(Config::GetInstance().MyAddress()->ToString());
         request.set_chosen_value(chosen_value);

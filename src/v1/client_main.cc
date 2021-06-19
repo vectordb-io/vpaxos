@@ -11,6 +11,15 @@
 #define gettid() (syscall(SYS_gettid))
 
 std::default_random_engine random_(time(nullptr));
+std::string exe_name;
+
+void Usage() {
+    std::cout << std::endl;
+    std::cout << "Usage: " << std::endl;
+    std::cout << exe_name << " host start_port thread_num" << std::endl;
+    std::cout << exe_name << " 127.0.0.1 38000 5" << std::endl;
+    std::cout << std::endl;
+}
 
 void
 TracePropose(const std::string &address, const vpaxos_rpc::Propose &request, vpaxos_rpc::ProposeReply &reply) {
@@ -27,7 +36,8 @@ TracePropose(const std::string &address, const vpaxos_rpc::Propose &request, vpa
     s.append(address);
     s.append(":");
     s.append(vpaxos::ToString(reply));
-    LOG(INFO) << s;
+    printf("%s\n", s.c_str());
+    fflush(nullptr);
 }
 
 void
@@ -45,29 +55,49 @@ Propose(const std::string &address, const std::string &value) {
 
     request.set_value(std::string(value));
     grpc::ClientContext context;
+
+    std::string str = "send to " + address + " " + vpaxos::ToString(request);
+    printf("%s\n", str.c_str());
+    fflush(nullptr);
     grpc::Status s = stub->RpcPropose(&context, request, &reply);
-
-    TracePropose(address, request, reply);
+    if (s.ok()) {
+        TracePropose(address, request, reply);
+    } else {
+        std::cout << s.error_message();
+    }
 }
-
-
 
 int
 main(int argc, char **argv) {
     FLAGS_alsologtostderr = true;
+    exe_name = std::string(argv[0]);
     google::InitGoogleLogging(argv[0]);
 
-    std::thread t1(std::bind(Propose, "127.0.0.1:38000", "0000"));
-    std::thread t2(std::bind(Propose, "127.0.0.1:38001", "1111"));
-    std::thread t3(std::bind(Propose, "127.0.0.1:38002", "2222"));
-    std::thread t4(std::bind(Propose, "127.0.0.1:38003", "3333"));
-    std::thread t5(std::bind(Propose, "127.0.0.1:38004", "4444"));
+    if (argc != 4) {
+        Usage();
+        exit(-1);
+    }
 
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
-    t5.join();
+    std::string host;
+    int start_port, thread_num;
+    host = argv[1];
+    sscanf(argv[2], "%d", &start_port);
+    sscanf(argv[3], "%d", &thread_num);
+
+    std::vector<std::thread*> threads;
+    for (int i = 0; i < thread_num; ++i) {
+        int port = start_port + i;
+        char *addr_buf = new char [128];
+        char *value_buf = new char [128];
+        snprintf(addr_buf, 128, "%s:%d", host.c_str(), port);
+        snprintf(value_buf, 128, "value_%d", i);
+        std::thread *t = new std::thread(std::bind(Propose, addr_buf, value_buf));
+        threads.push_back(t);
+    }
+
+    for (auto &t : threads) {
+        t->join();
+    }
 
     return 0;
 }

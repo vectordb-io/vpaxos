@@ -28,8 +28,8 @@ GrpcServer::AsyncProposeReply(const vpaxos_rpc::ProposeReply &reply, void *call)
 
         AsyncTaskOnPropose *p = static_cast<AsyncTaskOnPropose*>(call);
         p->done_ = true;
-        p->reply_.set_err_code(reply.err_code());
-        p->reply_.set_err_msg(reply.err_msg());
+        p->reply_.set_code(reply.code());
+        p->reply_.set_msg(reply.msg());
         p->reply_.set_chosen_value(reply.chosen_value());
         p->responder_.Finish(p->reply_, grpc::Status::OK, p);
         async_req_manager_.Delete(p);
@@ -247,14 +247,12 @@ GrpcServer::ThreadAsyncCalled() {
     bool ok;
     while (running_) {
         cq_in_->Next(&tag, &ok);
-        assert(ok);
-
-
-        AsyncTaskCalled *p = static_cast<AsyncTaskCalled*>(tag);
-
-        LOG(INFO) << "ThreadAsyncCalled call:" << p;
-
-        p->Process();
+        if (ok) {
+            AsyncTaskCalled *p = static_cast<AsyncTaskCalled*>(tag);
+            p->Process();
+        } else {
+            LOG(INFO) << "ThreadAsyncCalled error";
+        }
     }
 }
 

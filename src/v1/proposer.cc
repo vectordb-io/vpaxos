@@ -337,7 +337,7 @@ Proposer::PrepareAll(void *flag) {
     request.set_address(Config::GetInstance().MyAddress()->ToString());
     request.set_async_flag(reinterpret_cast<uint64_t>(flag));
 
-    for (auto &hp : Config::GetInstance().address_) {
+    for (auto &hp : Config::GetInstance().address()) {
         s = Prepare(request, hp->ToString());
         assert(s.ok());
     }
@@ -360,7 +360,7 @@ Proposer::AcceptAll(void *flag) {
         request.set_value(propose_value_);
     }
 
-    for (auto &hp : Config::GetInstance().address_) {
+    for (auto &hp : Config::GetInstance().address()) {
         s = Accept(request, hp->ToString());
         assert(s.ok());
     }
@@ -370,12 +370,27 @@ Proposer::AcceptAll(void *flag) {
 void
 Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
     TraceOnPropose(request);
+
+    if (Config::GetInstance().learner_optimized()) {
+        if (Node::GetInstance().learner()->Chosen()) {
+            std::string chosen_value;
+            Status s = Node::GetInstance().learner()->ChosenValue(chosen_value);
+            assert(s.ok());
+
+            vpaxos_rpc::ProposeReply reply;
+            reply.set_code(0);
+            reply.set_msg("learner-optimized value chosen");
+            reply.set_chosen_value(chosen_value);
+            Env::GetInstance().AsyncProposeReply(reply, async_flag);
+        }
+    }
+
     if (proposing_) {
         vpaxos_rpc::ProposeReply reply;
-        reply.set_err_code(2);
+        reply.set_code(2);
         std::string err_msg = "proposing value: ";
         err_msg.append(propose_value_);
-        reply.set_err_msg(err_msg);
+        reply.set_msg(err_msg);
         Env::GetInstance().AsyncProposeReply(reply, async_flag);
     }
     proposing_ = true;
@@ -385,6 +400,7 @@ Proposer::OnPropose(const vpaxos_rpc::Propose &request, void *async_flag) {
 
 Status
 Proposer::Prepare(const vpaxos_rpc::Prepare &request, const std::string &address) {
+    Node::GetInstance().Sleep();
     TracePrepare(request, address);
     auto s = Env::GetInstance().AsyncPrepare(
                  request,
@@ -442,7 +458,7 @@ Proposer::OnPrepareReply(const vpaxos_rpc::PrepareReply &reply) {
 
 Status
 Proposer::Accept(const vpaxos_rpc::Accept &request, const std::string &address) {
-    //Node::GetInstance().Sleep(100, 200);
+    Node::GetInstance().Sleep();
     TraceAccept(request, address);
     auto s = Env::GetInstance().AsyncAccept(
                  request,
@@ -490,14 +506,14 @@ Proposer::OnAcceptReply(const vpaxos_rpc::AcceptReply &reply) {
             vpaxos_rpc::ProposeReply propose_reply;
             std::string err_msg;
             if (propose_value_ == accept_manager_.AcceptedValue()) {
-                propose_reply.set_err_code(0);
+                propose_reply.set_code(0);
                 err_msg = "value chosen: ";
             } else {
-                propose_reply.set_err_code(1);
+                propose_reply.set_code(1);
                 err_msg = "another value chosen: ";
             }
             err_msg.append(accept_manager_.AcceptedValue());
-            propose_reply.set_err_msg(err_msg);
+            propose_reply.set_msg(err_msg);
             propose_reply.set_chosen_value(accept_manager_.AcceptedValue());
             uint64_t flag = reply.async_flag();
             Env::GetInstance().AsyncProposeReply(propose_reply, reinterpret_cast<void*>(flag));

@@ -38,9 +38,7 @@ Acceptor::Init() {
 
 void
 Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply &reply) {
-    //Node::GetInstance().Sleep(100, 200);
     TraceOnPrepare(request);
-
     Status s;
     Ballot receive_ballot;
     Ballot promised_ballot, accepted_ballot;
@@ -102,9 +100,7 @@ Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply
 
 void
 Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &reply) {
-    //Node::GetInstance().Sleep(100, 200);
     TraceOnAccept(request);
-
     Status s;
     Ballot receive_ballot;
     Ballot promised_ballot, accepted_ballot;
