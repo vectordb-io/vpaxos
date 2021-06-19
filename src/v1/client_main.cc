@@ -28,11 +28,11 @@ TracePropose(const std::string &address, const vpaxos_rpc::Propose &request, vpa
     snprintf(buf, sizeof(buf), "tid:%ld ", gettid());
     s.append(std::string(buf));
 
-    s.append("  st-");
+    s.append("  send_to-");
     s.append(address);
     s.append("-");
     s.append(vpaxos::ToStringTiny(request));
-    s.append("  rf-");
+    s.append("  recv_from-");
     s.append(address);
     s.append("-");
     s.append(vpaxos::ToStringTiny(reply));

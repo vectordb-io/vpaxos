@@ -39,29 +39,26 @@ Acceptor::Init() {
 void
 Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply &reply) {
     TraceOnPrepare(request);
-    Status s;
+
     Ballot receive_ballot;
     Ballot promised_ballot, accepted_ballot;
     std::string accepted_value;
 
     Pb2Ballot(request.ballot(), receive_ballot);
-    s = PromisedBallot(promised_ballot);
+    auto s = PromisedBallot(promised_ballot);
     assert(s.ok());
 
     if (receive_ballot == promised_ballot) {
-        LOG(INFO) << " repeat ballot: " << "receive_ballot:" << receive_ballot.ToString()
+        LOG(INFO) << "duplicated ballot, ignore. " << "receive_ballot:" << receive_ballot.ToString()
                   << " promised_ballot:" << promised_ballot.ToString();
+
+        // when network message is duplicated, this will happen. program may reply, or not.
+        // if here returns, a null reply will be sent to proposer. so just assert(0) or writen as "receive_ballot >= promised_ballot"
+        // but here we writen as "receive_ballot > promised_ballot" to make consistent with tla+
         assert(0);
     }
 
-//    LOG(INFO) << "debug OnPrepare " << "promised_ballot:" << promised_ballot.ToString() <<" receive_ballot:" << receive_ballot.ToString();
-
     if (promised_ballot.IsNull() || receive_ballot > promised_ballot) {
-
-
-//        LOG(INFO) << "debug agree";
-
-
         s = PersistPromisedBallot(receive_ballot);
         assert(s.ok());
         reply.set_prepared(true);
@@ -73,7 +70,7 @@ Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply
             reply.set_ever_accepted(true);
             Ballot2Pb(accepted_ballot, *reply.mutable_accepted_ballot());
 
-            s = AcceptedValue(accepted_value);
+            auto s = AcceptedValue(accepted_value);
             assert(s.ok());
             reply.set_accepted_value(accepted_value);
 
@@ -84,42 +81,35 @@ Acceptor::OnPrepare(const vpaxos_rpc::Prepare &request, vpaxos_rpc::PrepareReply
     } else {
         reply.set_prepared(false);
         Ballot2Pb(promised_ballot, *reply.mutable_promised_ballot());
-
-
-
-//        LOG(INFO) << "debug reject, return promised_ballot:" << promised_ballot.ToString();
     }
 
     Ballot2Pb(receive_ballot, *reply.mutable_trace_ballot());
     reply.set_address(Config::GetInstance().MyAddress()->ToString());
     reply.set_async_flag(request.async_flag());
-
-
     TracePrepareReply(reply, request.address());
 }
 
 void
 Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &reply) {
     TraceOnAccept(request);
-    Status s;
+
     Ballot receive_ballot;
     Ballot promised_ballot, accepted_ballot;
     std::string accepted_value;
 
     Pb2Ballot(request.ballot(), receive_ballot);
-    s = PromisedBallot(promised_ballot);
+    auto s = PromisedBallot(promised_ballot);
     assert(s.ok());
 
+    // notice! here is ">="!
     if (promised_ballot.IsNull() || receive_ballot >= promised_ballot) {
-        //----------------------------------------------------------
-        {
-            auto s = AcceptedBallot(accepted_ballot);
-            assert(s.ok());
-            if (!accepted_ballot.IsNull()) {
-                assert(receive_ballot >= accepted_ballot);
-            }
+        // just an assert ------------------------------
+        s = AcceptedBallot(accepted_ballot);
+        assert(s.ok());
+        if (!accepted_ballot.IsNull()) {
+            assert(receive_ballot >= accepted_ballot);
         }
-        //----------------------------------------------------------
+        // ---------------------------------------------
 
         s = PersistPromisedBallot(receive_ballot);
         assert(s.ok());
@@ -134,8 +124,6 @@ Acceptor::OnAccept(const vpaxos_rpc::Accept &request, vpaxos_rpc::AcceptReply &r
 
     } else {
         reply.set_accepted(false);
-
-        // add this line ???
         Ballot2Pb(promised_ballot, *reply.mutable_accepted_ballot());
     }
 

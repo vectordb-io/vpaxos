@@ -44,7 +44,7 @@ class PrepareManager {
     int quorum_;
     Ballot promised_ballot_;
     Ballot max_accepted_ballot_; // maybe null
-    std::string accepted_value_; // max_accepted_ballot_ is not null
+    std::string accepted_value_; // update this with max_accepted_ballot_
     std::map<std::string, vpaxos_rpc::PrepareReply> votes_;
 };
 
