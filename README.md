@@ -12,7 +12,7 @@ More details at [Build Paxos In Practice](http://vectordb.io)
 2. 异步网络通信架构，完美适应分布式系统环境
 3. 清晰的类设计与层次划分，通用的组件化设计
 
-## notes
+## Notes
 >vpaxos不是一个用于生产环境的项目，它只是我自己用来研究如何实现一个Paxos算法的项目，可以说只是一个实验场。但里面很多的组件（ThreadPool，AsyncCall，Node，Env，Timer）是通用的，可以毫无改动的用于另一个生产环境中使用的项目：**vraft:** [https://github.com/vectordb-io/vraft](https://github.com/vectordb-io/vraft)
 >
 >关于TLA+的细节，可以参考我的系列文章[《TLA+学习笔记》](http://vectordb.io)
