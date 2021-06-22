@@ -15,7 +15,7 @@ More details at [Build Paxos In Practice](http://vectordb.io)
 ## Notes
 >vpaxos不是一个用于生产环境的项目，它只是我自己用来研究如何实现Paxos算法的项目，可以说只是一个实验场。Paxos的精髓在于单值的确定（Single Value Paxos）。在这个实验场里，我尝试了Paxos的多种不同写法。我觉得把Single Value Paxos研究透，是很有价值的，这是分布式系统的基础。而在生产环境中，我们可以做一个raft的实现。vpaxos里面很多的组件（ThreadPool，AsyncCall，Node，Env，Timer）是通用的，可以毫无改动的用于另一个生产环境中使用的项目：**vraft:** [https://github.com/vectordb-io/vraft](https://github.com/vectordb-io/vraft)
 >
->关于TLA+的细节，可以参考我的系列文章[《TLA+学习笔记》](http://vectordb.io)
+>关于TLA+的细节，可以参考我的系列文章[《TLA+学习笔记》](http://sourceinsight.io:8080/)
 >
 >关于VPaxos的细节，可以参考我的系列文章[《自己动手实现Paxos》](http://vectordb.io)
 
