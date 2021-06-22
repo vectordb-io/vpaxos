@@ -15,4 +15,7 @@ More details at [Build Paxos In Practice](http://vectordb.io)
 ## note
 vpaxos不是一个用于生产环境的项目，它只是为了用来研究如何实现一个Paxos算法。但里面很多的组件（ThreadPool，AsyncCall，Node，Env，Timer）是通用的，可以毫无改动的用于另一个生产环境中使用的项目：**vraft:** [https://github.com/vectordb-io/vraft](https://github.com/vectordb-io/vraft)
 <br>
-更多的细节，可以参考我的系列文章[《自己动手实现Paxos》](http://vectordb.io)
+<br>
+关于TLA+的细节，可以参考我的系列文章[《TLA+学习笔记》](http://vectordb.io)
+<br>
+关于VPaxos的细节，可以参考我的系列文章[《自己动手实现Paxos》](http://vectordb.io)
