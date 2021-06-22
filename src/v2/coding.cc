@@ -376,10 +376,8 @@ ToStringTiny(const vpaxos_rpc::Accept &pb) {
 jsonxx::json64
 ToJson(const vpaxos_rpc::AcceptReply &pb) {
     jsonxx::json64 j, jj;
-    j["accepted"] = pb.accepted();
     j["accepted_ballot"] = ToJson(pb.accepted_ballot());
     j["accepted_value"] = pb.accepted_value();
-    j["trace_ballot"] = ToJson(pb.trace_ballot());
     j["address"] = pb.address();
     j["async_flag"] = pb.async_flag();
     jj["AcceptReply"] = j;
@@ -413,10 +411,8 @@ ToStringPretty(const vpaxos_rpc::AcceptReply &pb) {
 jsonxx::json64
 ToJsonTiny(const vpaxos_rpc::AcceptReply &pb) {
     jsonxx::json64 j, jj;
-    j["accepted"] = pb.accepted();
     j["accepted_bal"] = ToJsonTiny(pb.accepted_ballot());
     j["accepted_value"] = pb.accepted_value();
-    j["trace_bal"] = ToJsonTiny(pb.trace_ballot());
     jj["AcceptReply"] = j;
     return jj;
 }
