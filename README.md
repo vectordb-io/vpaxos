@@ -30,7 +30,7 @@ More details at [Build Paxos In Practice](http://vectordb.io)
 >phxpaxos是腾讯开源的一个paxos库，最大的价值在于已经大规模应用于线上，这和那些胡乱吹嘘 “比xx性能高出xx倍” 的项目不可同日而语。虽然我不完全认同phxpaxos的设计实现，里面似乎也有一些subtle的代码，但我仍从中学到了很多东西。phxpaxos不失为一个值得研究的优质开源项目。
 >
 >最后要提一下lamport老爷子。对于搞分布式的同学来说，他真是神一样的存在。在TLA+ Toolbox中，一个简单的Single Paxos流程（3个ballot）就跑出了几十万个不同的状态。这种变化，人脑是无法把握的。但有了TLA+，有了形式化，我们写起代码来，也会更有信心。
->最后上一个lamport帅图，这是他视频课程的最后一节的截图。看着他远去的背影，感慨万千。正所谓：事了拂衣去，深藏功与名。
+>最后上两张lamport老爷子的帅图，这是他视频课程最后一节的截图。看着他远去的背影，感慨万千。正所谓：事了拂衣去，深藏功与名。
 >
 >
 ><img src="http://vectordb.io/images/lamport1.jpeg" width="30%">
